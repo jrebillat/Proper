@@ -3,7 +3,6 @@ package net.alantea.proper.example;
 import net.alantea.proper.PropertyContainer;
 import net.alantea.proper.Require;
 
-
 @Require(key=Container.PROP_ONE, type=Integer.class)
 public class Container extends PropertyContainer
 {
@@ -20,5 +19,4 @@ public class Container extends PropertyContainer
       cont.setPropertyValue(PROP_ONE, 2);
       cont.setPropertyValue(PROP_ONE, 3);
    }
-
 }

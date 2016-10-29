@@ -39,3 +39,62 @@ The *action* parameter is optional and, if present, will make the system trigger
 This is a simple basic (and useless) example that convert a integer in long and a long to double to print it.
 
 ### Container definition
+The class below is the container-derived class.
+```java
+package net.alantea.proper.example;
+
+import net.alantea.proper.PropertyContainer;
+import net.alantea.proper.Require;
+
+@Require(key=Container.PROP_ONE, type=Integer.class)
+public class Container extends PropertyContainer
+{
+   public static final String PROP_ONE = "PropertyOne";
+
+   public static void main(String[] args)
+   {
+      Container container = new Container();
+      container.associate(new IntegerToLongConverter());
+      container.associate(new LongToDoubleConverter());
+      container.associate(new DoublePrinter());
+      
+      container.setPropertyValue(PROP_ONE, 1);
+      container.setPropertyValue(PROP_ONE, 2);
+      container.setPropertyValue(PROP_ONE, 3);
+   }
+}
+```
+In this class defining a container, there is a property required, of type Integer, named "PropertyOne".
+
+It also includes the main method (this is not mandatory) that will create an instance of the container and associate instances of the other needed classes.
+
+### Integer to long converter
+This class is just a converter from integer to long, for a container.
+```java
+package net.alantea.proper.example;
+
+import net.alantea.proper.Associate;
+import net.alantea.proper.Manage;
+import net.alantea.proper.Require;
+
+@Require(key=Container.PROP_ONE, type=Integer.class, action=IntegerToLongConverter.ACT_GOTINTEGER)
+@Require(key=IntegerToLongConverter.PROP_TWO, type=Long.class)
+public class IntegerToLongConverter
+{
+   public static final String PROP_TWO = "PropertyTwo";
+   public static final String ACT_GOTINTEGER = "GotInteger";
+
+   @Associate(Container.PROP_ONE)
+   private int reference;
+   
+   @Associate(Container.PROP_THIS)
+   private Container container;
+   
+   @Manage(ACT_GOTINTEGER)
+   private void actionGotInteger()
+   {
+      System.out.println("got integer : " + reference);
+      container.setPropertyValue(IntegerToLongConverter.PROP_TWO, (long)reference);
+   }
+}
+```
