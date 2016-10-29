@@ -3,10 +3,11 @@ package net.alantea.proper.example;
 import net.alantea.proper.PropertyContainer;
 import net.alantea.proper.Require;
 
-@Require(key=Container.PROP_ONE, type=Integer.class)
+@Require(key=Container.PROP_ONE, type=Integer.class, action=Container.ACT_GOTINTEGER)
 public class Container extends PropertyContainer
 {
    public static final String PROP_ONE = "PropertyOne";
+   public static final String ACT_GOTINTEGER = "GotInteger";
 
    public static void main(String[] args)
    {

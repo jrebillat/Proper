@@ -580,6 +580,19 @@ public class PropertyContainer
           }
        });
 
+       if (!"".equals(annotation.action()))
+       {
+          List<String> propActions = propertyActionsMap.get(annotation.key());
+          if (propActions == null)
+          {
+             propActions = new ArrayList<>();
+             propertyActionsMap.put(annotation.key(), propActions);
+          }
+          if (! propActions.contains(annotation.action()))
+          {
+             propActions.add(annotation.action());
+          }
+       }
       }
    }
 
