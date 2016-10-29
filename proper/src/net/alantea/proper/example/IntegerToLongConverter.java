@@ -4,9 +4,9 @@ import net.alantea.proper.Associate;
 import net.alantea.proper.Manage;
 import net.alantea.proper.Require;
 
-@Require(key=Container.PROP_ONE, type=Integer.class, action=IntegerToDoubleConverter.ACT_GOTINTEGER)
-@Require(key=IntegerToDoubleConverter.PROP_TWO, type=Double.class)
-public class IntegerToDoubleConverter
+@Require(key=Container.PROP_ONE, type=Integer.class, action=IntegerToLongConverter.ACT_GOTINTEGER)
+@Require(key=IntegerToLongConverter.PROP_TWO, type=Long.class)
+public class IntegerToLongConverter
 {
    public static final String PROP_TWO = "PropertyTwo";
    public static final String ACT_GOTINTEGER = "GotInteger";
@@ -20,6 +20,7 @@ public class IntegerToDoubleConverter
    @Manage(ACT_GOTINTEGER)
    private void actionGotInteger()
    {
-      container.setPropertyValue(IntegerToDoubleConverter.PROP_TWO, (double)reference);
+      System.out.println("got integer : " + reference);
+      container.setPropertyValue(IntegerToLongConverter.PROP_TWO, (long)reference);
    }
 }

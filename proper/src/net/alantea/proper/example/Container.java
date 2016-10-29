@@ -12,7 +12,9 @@ public class Container extends PropertyContainer
    public static void main(String[] args)
    {
       Container cont = new Container();
-      cont.associate(new IntegerToDoubleConverter());
+      cont.associate(new IntegerToLongConverter());
+      cont.associate(new LongToDoubleConverter());
+      cont.associate(new DoublePrinter());
       
       cont.setPropertyValue(PROP_ONE, 1);
       cont.setPropertyValue(PROP_ONE, 2);

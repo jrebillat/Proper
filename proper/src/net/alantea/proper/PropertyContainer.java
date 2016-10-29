@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 
@@ -56,6 +57,12 @@ public class PropertyContainer
    /** The action map. */
    private Map<String, List<ObjectMethod>> actionMap;
    
+   /** The associated fields map. */
+   private Map<String, List<ObjectField>> fieldsMap;
+   
+   /** The associated actions map. */
+   private Map<String, List<String>> propertyActionsMap;
+   
    /**
     * Instantiates a new container.
     */
@@ -64,6 +71,8 @@ public class PropertyContainer
       super();
       properties = new LinkedHashMap<>();
       actionMap = new LinkedHashMap<>();
+      fieldsMap = new LinkedHashMap<>();
+      propertyActionsMap = new LinkedHashMap<>();
 
       setPropertyValue(PROP_THIS, this);
       createProperties();
@@ -223,6 +232,7 @@ public class PropertyContainer
       associateActionMethods(element, element.getClass());
       associateFields(element, element.getClass());
       initializeFields(element, element.getClass());
+      bindFields(element, element.getClass());
    }
 
    /**
@@ -242,9 +252,16 @@ public class PropertyContainer
             createProperty(annotation);
             if (!"".equals(annotation.action()))
             {
-               addPropertyListener(annotation.key(),
-                     (v, o, n) ->
-               execute(annotation.action(), getProperty(annotation.key())));
+               List<String> propActions = propertyActionsMap.get(annotation.key());
+               if (propActions == null)
+               {
+                  propActions = new ArrayList<>();
+                  propertyActionsMap.put(annotation.key(), propActions);
+               }
+               if (! propActions.contains(annotation.action()))
+               {
+                  propActions.add(annotation.action());
+               }
             }
          }
       }
@@ -326,18 +343,13 @@ public class PropertyContainer
                }
             }
 
-            getProperty(associates.value()).addListener((v, o, n) ->
+            List<ObjectField> propFields = fieldsMap.get(associates.value());
+            if (propFields == null)
             {
-                  try
-                  {
-                     field.set(element, n);
-                  }
-                  catch (IllegalArgumentException | IllegalAccessException e)
-                  {
-                     // TODO Auto-generated catch block
-                     e.printStackTrace();
-                  }
-            });
+               propFields = new ArrayList<>();
+               fieldsMap.put(associates.value(), propFields);
+            }
+            propFields.add(new ObjectField(element, field));
          }
       }
       cl = cl.getSuperclass();
@@ -351,7 +363,7 @@ public class PropertyContainer
     * Initialize fields.
     *
     * @param element the element
-    * @param cl the cl
+    * @param cl the class
     */
    private void initializeFields(Object element, Class<?> cl)
    {
@@ -384,6 +396,67 @@ public class PropertyContainer
                {
                   // TODO Auto-generated catch block
                   e.printStackTrace();
+               }
+            }
+         }
+      }
+      cl = cl.getSuperclass();
+      if (!Object.class.equals(cl))
+      {
+         initializeFields(element, cl);
+      }
+   }
+
+   /**
+    * Bind fields.
+    *
+    * @param element the element
+    * @param cl the cl
+    */
+   @SuppressWarnings({ "unchecked", "rawtypes" })
+   private void bindFields(Object element, Class<?> cl)
+   {
+      for (Field field : cl.getDeclaredFields())
+      {
+         if ((field.isAnnotationPresent(Bind.class)) && (Property.class.isAssignableFrom(field.getType())))
+         {
+            field.setAccessible(true);
+            Bind associates = field.getAnnotation(Bind.class);
+            if (!this.hasProperty(associates.value()))
+            {
+               try
+               {
+                  setPropertyValue(associates.value(), ((Property<?>) field.get(element)).getValue());
+               }
+               catch (IllegalArgumentException | IllegalAccessException e)
+               {
+                  // TODO Auto-generated catch block
+                  e.printStackTrace();
+               }
+               
+            }
+            
+            Property containerProperty = getProperty(associates.value());
+            Property elementProperty = null;
+            try
+            {
+               elementProperty = (Property) field.get(element);
+            }
+            catch (IllegalArgumentException | IllegalAccessException e)
+            {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+            
+            if (elementProperty != null)
+            {
+               if (associates.biDirectional())
+               {
+                  elementProperty.bindBidirectional(containerProperty);
+               }
+               else
+               {
+                  elementProperty.bind(containerProperty);
                }
             }
          }
@@ -476,6 +549,37 @@ public class PropertyContainer
       {
          Object value = getDefaultValueForClass(annotation.type());
          setPropertyValue(annotation.key(), value);
+
+       addPropertyListener(annotation.key(),
+             (v, o, n) ->
+       {
+          List<ObjectField> propFields = fieldsMap.get(annotation.key());
+          if (propFields != null)
+          {
+             for(ObjectField field : propFields)
+             {
+                try
+                {
+                   field.getField().set(field.getObject(), n);
+                }
+                catch (IllegalArgumentException | IllegalAccessException e)
+                {
+                   // TODO Auto-generated catch block
+                   e.printStackTrace();
+                }
+             }
+          }
+          
+          List<String> propActions = propertyActionsMap.get(annotation.key());
+          if (propActions != null)
+          {
+             for(String action : propActions)
+             {
+                execute(action, n);
+             }
+          }
+       });
+
       }
    }
 
