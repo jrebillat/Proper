@@ -23,17 +23,19 @@ At the opposite, it is possible to bind properties in an element to a property i
 ### @Require
 The @Require annotation is usable on any class type. It will make sure that a specified property exist in the container, with required type and, optionally, associated action.
 The syntax is :
-`java
+```java
 @Require(
    key="property key"
    type=class type
    action="action key"
 )
-`
+```
+
 The *key* parameter is mandatory. This key will be used in code every time a reference to this property is needed, to get value, to set it, to add listener or any other work.
 The *type* parameter is mandatory. It is only use on the first requiring of this property, to select the content type for the Property. ** A work to do will be to verify the coherency in several calls **
 The *action* parameter is optional and, if present, will make the system trigger the action with the given name on each modification in the property value. See the @Manage annotation for more on actions.
 
 ## Simple example
-This is a simple basic example
+This is a simple basic (and useless) example that convert a integer in long and a long to double to print it.
+
 ### Container definition
