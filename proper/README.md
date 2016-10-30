@@ -42,9 +42,38 @@ The syntax is :
 @Require("action key")
 ```
 
-The *action key* value is the key of the corresponding action, set on at least on @Require in one class (the container or any element).
+The *action key* value is the key of the corresponding action, set on at least one @Require in one class (the container or any element).
 As said, the method must not expect more than one parameter (zero or one are OK). If a parameter is expected, it must be assignable from the property value type. The return type of the method is ignored.
 
+### @Associate
+The @Associate annotation is usable on any instance field (even on private ones). It only work if the field has a type compatible with the property value type to associate. It will just inform the container to change the field value each time the property content value is changed.
+The syntax is :
+```java
+@Associate("property key")
+```
+
+The *property key* value is the key of the corresponding property, set on at least one @Require in the class. The property must have a content value compatible with the field.
+
+### @Initialize
+The @Initialize annotation is usable on any instance field (even on private ones). It only work if the field has a type compatible with the property value type to initialize with. It will just set the field value to the property content value at association. The value will not be affected afterwards, even if the property contant value is changed.
+The syntax is :
+```java
+@Initialize("property key")
+```
+
+The *property key* value is the key of the corresponding property, set on at least one @Require in the class. The property must have a content value compatible with the field and have been set to a intelligent value before element instance association with the container.
+
+### @Bind
+The @Bind annotation is usable on any instance field that derives from a Property (even on private ones). It only work if the content object for the field property has a type compatible with the container property value type to bind with. It will just bind the two properties, either from container property to field property, or bidirectional.
+The syntax is :
+```java
+@Bind("property key"
+bidirectional=true|false
+)
+```
+
+The *property key* value is the key of the corresponding container property, set on at least one @Require somewhere. The container property must have a content value compatible with the field property.
+The *bidirectional* parameter is optional and set to *false* by default. If set to true, the bind is bidirectional. By default or set to false, the bind will be from container property to field property.
 
 ## Simple example
 This is a simple basic (and useless) example that convert a integer in long and a long to double to print it.
@@ -150,3 +179,40 @@ public class LongToDoubleConverter
 This class requires two properties : the same long property as the IntegerToLongConverter class and another new property of type double, to be added to container. It associate an action named "GotLong" with this property value change.
 It binds the long property to the long property field *reference* and initialize the container itself to the *container* field, to use it when needed.
 It also defines a method to manage the action "GotLong" defined in this element. This method will change the double property value to reflect the long modification.
+
+### Double printer
+This class is offering a way to print doubles passed to its method.
+```java
+package net.alantea.proper.example;
+
+import net.alantea.proper.Manage;
+import net.alantea.proper.Require;
+
+@Require(key=LongToDoubleConverter.PROP_THREE, type=Double.class, action=DoublePrinter.ACT_GOTDOUBLE)
+public class DoublePrinter
+{
+   public static final String ACT_GOTDOUBLE = "GotDouble";
+
+   @Manage(ACT_GOTDOUBLE)
+   private void actionGotDouble(double value)
+   {
+      System.out.println("I got a double value : " + value);
+   }
+}
+```
+This class requires a double property : the same long property as the LongToDoubleConverter. It associate an action named "GotDouble" with this property value change.
+It also defines a method to manage the action "GotDouble" defined in this element. This method will print its argument. In fact, it will be used to print the property value to reflect the double modification.
+
+### Result
+The example above should send the following output to the console :
+`
+got integer : 1
+got long : 1
+I got a double value : 1.0
+got integer : 2
+got long : 2
+I got a double value : 2.0
+got integer : 3
+got long : 3
+I got a double value : 3.0
+`
