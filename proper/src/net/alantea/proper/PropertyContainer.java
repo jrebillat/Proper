@@ -74,6 +74,23 @@ public class PropertyContainer extends ActionManager
    }
    
    /**
+    * Instantiates a new container.
+    *
+    * @param name the name for container
+    */
+   public PropertyContainer(String name)
+   {
+      super(name);
+      properties = new LinkedHashMap<>();
+      fieldsMap = new LinkedHashMap<>();
+      propertyActionsMap = new LinkedHashMap<>();
+
+      setPropertyValue(PROP_THIS, this);
+      createProperties();
+      associateActionMethods(this, getClass());
+   }
+   
+   /**
     * Instantiates a new property container and associate a list of elements to it.
     *
     * @param toBeAssociated the elements to be associated. They should use the annotations to be fully associated.
@@ -84,6 +101,43 @@ public class PropertyContainer extends ActionManager
       for (Object toAssociate : toBeAssociated)
       {
          associate(toAssociate);
+      }
+   }
+   
+   /**
+    * Gets the named manager.
+    *
+    * @param name the name
+    * @return the manager
+    */
+   public static PropertyContainer getContainer(String name)
+   {
+      ActionManager container = getManager(name);
+      if (container == null)
+      {
+         container = new PropertyContainer(name);
+      }
+      if ((container == null) || (!PropertyContainer.class.isAssignableFrom(container.getClass())))
+      {
+         return null;
+      }
+      return (PropertyContainer) container;
+   }
+   
+   /**
+    * Associate something with the named action manager.
+    */
+   public static void associate(String managerName, Object element)
+   {
+      PropertyContainer container = getContainer(managerName);
+      if (container == null)
+      {
+         container = new PropertyContainer(managerName);
+      }
+      
+      if (element != null)
+      {
+         container.associate(element);
       }
    }
    

@@ -3,6 +3,7 @@ package net.alantea.proper;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import java.util.Map;
  */
 public class ActionManager
 {
+   private static Map<String, ActionManager> namedManagers = new HashMap<>();;
    /** The action map. */
    private Map<String, List<ObjectMethod>> actionMap;
    
@@ -26,6 +28,18 @@ public class ActionManager
    public ActionManager()
    {
       super();
+      actionMap = new LinkedHashMap<>();
+
+      associateActionMethods(this, getClass());
+   }
+   
+   /**
+    * Instantiates a new named action manager.
+    */
+   public ActionManager(String name)
+   {
+      super();
+      namedManagers.put(name, this);
       actionMap = new LinkedHashMap<>();
 
       associateActionMethods(this, getClass());
@@ -42,6 +56,29 @@ public class ActionManager
       for (Object toAssociate : toBeAssociated)
       {
          associate(toAssociate);
+      }
+   }
+   
+   /**
+    * Gets the named manager.
+    *
+    * @param name the name
+    * @return the manager
+    */
+   public static ActionManager getManager(String name)
+   {
+      return namedManagers.get(name);
+   }
+   
+   /**
+    * Associate something with the named action manager.
+    */
+   public static void associate(String managerName, Object element)
+   {
+      ActionManager manager = namedManagers.get(managerName);
+      if ((element != null) && (manager != null))
+      {
+         manager.associateActionMethods(element, element.getClass());
       }
    }
    

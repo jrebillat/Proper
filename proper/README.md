@@ -75,6 +75,9 @@ bidirectional=true|false
 The *property key* value is the key of the corresponding container property, set on at least one @Require somewhere. The container property must have a content value compatible with the field property.
 The *bidirectional* parameter is optional and set to *false* by default. If set to true, the bind is bidirectional. By default or set to false, the bind will be from container property to field property.
 
+## Named containers
+It is sometimes easier not to have to worry about containers and work only with elements. You can achieve this with the named containers : containers instantiated automatically and stored in a map, to be referenced afterwards by their name.
+
 ## Simple example
 This is a simple basic (and useless) example that convert a integer in long and a long to double to print it.
 
