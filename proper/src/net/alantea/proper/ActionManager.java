@@ -27,10 +27,7 @@ public class ActionManager
     */
    public ActionManager()
    {
-      super();
-      actionMap = new LinkedHashMap<>();
-
-      associateActionMethods(this, getClass());
+      this((String)null);
    }
    
    /**
@@ -39,7 +36,10 @@ public class ActionManager
    public ActionManager(String name)
    {
       super();
-      namedManagers.put(name, this);
+      if (name != null)
+      {
+         namedManagers.put(name, this);
+      }
       actionMap = new LinkedHashMap<>();
 
       associateActionMethods(this, getClass());
@@ -67,7 +67,7 @@ public class ActionManager
     */
    public static ActionManager getManager(String name)
    {
-      return namedManagers.get(name);
+      return (name == null) ? null : namedManagers.get(name);
    }
    
    /**
@@ -75,8 +75,12 @@ public class ActionManager
     */
    public static void associate(String managerName, Object element)
    {
+      if ((managerName == null) || (element == null))
+      {
+         return;
+      }
       ActionManager manager = namedManagers.get(managerName);
-      if ((element != null) && (manager != null))
+      if (manager != null)
       {
          manager.associateActionMethods(element, element.getClass());
       }
@@ -114,16 +118,20 @@ public class ActionManager
             Manage[] manages = method.getAnnotationsByType(Manage.class);
             for (Manage manage : manages)
             {
-               List<ObjectMethod> actionList = actionMap.get(manage.value());
-               if (actionList == null)
+               String action = manage.value();
+               if ((action != null) && (action.length() > 0))
                {
-                  actionList = new ArrayList<>();
-                  actionMap.put(manage.value(), actionList);
+                  List<ObjectMethod> actionList = actionMap.get(action);
+                  if (actionList == null)
+                  {
+                     actionList = new ArrayList<>();
+                     actionMap.put(action, actionList);
+                  }
+                  if (method.getParameterCount() < 2)
+                  {
+                     actionList.add(new ObjectMethod(element, method, method.getParameterCount() == 1));
+                  }
                }
-               if (method.getParameterCount() < 2)
-               {
-                  actionList.add(new ObjectMethod(element, method, method.getParameterCount() == 1));
-               } 
             }
          }
       }
@@ -141,7 +149,10 @@ public class ActionManager
     */
    public final void execute(String actionKey)
    {
-      execute(actionKey, null, false);
+      if ((actionKey != null) && (actionKey.length() > 0))
+      {
+         execute(actionKey, null, false);
+      }
    }
    
    /**
@@ -152,7 +163,10 @@ public class ActionManager
     */
    public final void execute(String actionKey, Object actionContent)
    {
-      execute(actionKey, actionContent, true);
+      if ((actionKey != null) && (actionKey.length() > 0))
+      {
+         execute(actionKey, actionContent, true);
+      }
    }
    
    /**

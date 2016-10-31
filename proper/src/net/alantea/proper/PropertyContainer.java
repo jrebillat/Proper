@@ -63,14 +63,7 @@ public class PropertyContainer extends ActionManager
     */
    public PropertyContainer()
    {
-      super();
-      properties = new LinkedHashMap<>();
-      fieldsMap = new LinkedHashMap<>();
-      propertyActionsMap = new LinkedHashMap<>();
-
-      setPropertyValue(PROP_THIS, this);
-      createProperties();
-      associateActionMethods(this, getClass());
+      this((String)null);
    }
    
    /**
@@ -112,12 +105,16 @@ public class PropertyContainer extends ActionManager
     */
    public static PropertyContainer getContainer(String name)
    {
+      if (name == null)
+      {
+         return null;
+      }
       ActionManager container = getManager(name);
       if (container == null)
       {
          container = new PropertyContainer(name);
       }
-      if ((container == null) || (!PropertyContainer.class.isAssignableFrom(container.getClass())))
+      if (!PropertyContainer.class.isAssignableFrom(container.getClass()))
       {
          return null;
       }
@@ -129,6 +126,10 @@ public class PropertyContainer extends ActionManager
     */
    public static void associate(String managerName, Object element)
    {
+      if (managerName == null)
+      {
+         return;
+      }
       PropertyContainer container = getContainer(managerName);
       if (container == null)
       {
@@ -149,7 +150,7 @@ public class PropertyContainer extends ActionManager
     */
    public final void addPropertyListener(String key, ChangeListener<Object> listener)
    {
-      if (listener != null)
+      if ((key != null) && (listener != null))
       {
          if (!properties.containsKey(key))
          {
@@ -185,6 +186,10 @@ public class PropertyContainer extends ActionManager
     */
    public final boolean hasProperty(String key)
    {
+      if (key == null)
+      {
+         return false;
+      }
       return properties.containsKey(key);
    }
    
@@ -222,7 +227,7 @@ public class PropertyContainer extends ActionManager
    @SuppressWarnings("unchecked")
    public final <T> ObjectProperty<T> getProperty(String key)
    {
-      return (ObjectProperty<T>) properties.get(key);
+      return (key != null) ? (ObjectProperty<T>) properties.get(key) : null;
    }
    
    /**
@@ -235,7 +240,7 @@ public class PropertyContainer extends ActionManager
    @SuppressWarnings("unchecked")
    public final <T> T getPropertyValue(String key)
    {
-      if (properties.containsKey(key))
+      if ((key != null) && (properties.containsKey(key)))
       {
          Object value = properties.get(key).get();
          if (value != null)
@@ -254,6 +259,10 @@ public class PropertyContainer extends ActionManager
     */
    public final void setPropertyValue(String key, Object value)
    {
+      if (key == null)
+      {
+         return;
+      }
       if (!properties.containsKey(key))
       {
          properties.put(key, new SimpleObjectProperty<Object>(value));
@@ -276,6 +285,10 @@ public class PropertyContainer extends ActionManager
     */
    public final void associate(Object element)
    {
+      if (element == null)
+      {
+         return;
+      }
       createRequiredProperties(element);
       associateActionMethods(element, element.getClass());
       associateFields(element, element.getClass());
