@@ -2,8 +2,6 @@ package net.alantea.proper;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,7 +43,7 @@ import javafx.beans.value.ChangeListener;
  * the container, then the value of the field will be set at association to the current property value at that time. If not, then a new
  * property with the field value is created. Changes will not be reflected afterwards.
  */
-public class PropertyContainer
+public class PropertyContainer extends ActionManager
 {
    
    /** The Constant PROP_THIS. Use to represent the container itself in the property list. */
@@ -53,9 +51,6 @@ public class PropertyContainer
    
    /** The properties. */
    private Map<String, ObjectProperty<Object>> properties;
-   
-   /** The action map. */
-   private Map<String, List<ObjectMethod>> actionMap;
    
    /** The associated fields map. */
    private Map<String, List<ObjectField>> fieldsMap;
@@ -70,7 +65,6 @@ public class PropertyContainer
    {
       super();
       properties = new LinkedHashMap<>();
-      actionMap = new LinkedHashMap<>();
       fieldsMap = new LinkedHashMap<>();
       propertyActionsMap = new LinkedHashMap<>();
 
@@ -268,42 +262,6 @@ public class PropertyContainer
    }
 
    /**
-    * Associate action methods.
-    *
-    * @param element the element
-    * @param cl the cl
-    */
-   private void associateActionMethods(Object element, Class<?> cl)
-   {
-      for (Method method : cl.getDeclaredMethods())
-      {
-         if ((method.isAnnotationPresent(Manages.class)) || (method.isAnnotationPresent(Manage.class)))
-         {
-            method.setAccessible(true);
-            Manage[] manages = method.getAnnotationsByType(Manage.class);
-            for (Manage manage : manages)
-            {
-               List<ObjectMethod> actionList = actionMap.get(manage.value());
-               if (actionList == null)
-               {
-                  actionList = new ArrayList<>();
-                  actionMap.put(manage.value(), actionList);
-               }
-               if (method.getParameterCount() < 2)
-               {
-                  actionList.add(new ObjectMethod(element, method, method.getParameterCount() == 1));
-               } 
-            }
-         }
-      }
-      cl = cl.getSuperclass();
-      if (!Object.class.equals(cl))
-      {
-         associateActionMethods(element, cl);
-      }
-   }
-
-   /**
     * Associate fields.
     *
     * @param element the element
@@ -465,64 +423,6 @@ public class PropertyContainer
       if (!Object.class.equals(cl))
       {
          associateFields(element, cl);
-      }
-   }
-   
-   /**
-    * Execute, using only methods with no parameters.
-    *
-    * @param actionKey the action key
-    */
-   public final void execute(String actionKey)
-   {
-      execute(actionKey, null, false);
-   }
-   
-   /**
-    * Execute, using methods with zero or one parameter.
-    *
-    * @param actionKey the action key
-    * @param actionContent the action content
-    */
-   public final void execute(String actionKey, Object actionContent)
-   {
-      execute(actionKey, actionContent, true);
-   }
-   
-   /**
-    * Execute.
-    *
-    * @param actionKey the action key
-    * @param actionContent the action content
-    * @param useParameter the use parameter flag
-    */
-   private void execute(String actionKey, Object actionContent, boolean useParameter)
-   {
-      List<ObjectMethod> actionList = actionMap.get(actionKey);
-      if (actionList != null)
-      {
-         for (ObjectMethod exe : actionList)
-         {
-            try
-            {
-               if (exe.isNeedsParameters())
-               {
-                  if (useParameter)
-                  {
-                     exe.getMethod().invoke(exe.getObject(), actionContent);
-                  }
-               }
-               else
-               {
-                  exe.getMethod().invoke(exe.getObject());
-               }
-            }
-            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-            {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            }
-         }
       }
    }
 
