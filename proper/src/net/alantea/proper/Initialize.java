@@ -25,4 +25,12 @@ public @interface Initialize
     * @return the property name in the container
     */
    public String value();
+   
+   /**
+    * If not empty, specify this annotation to be used only when associating with this reference code.
+    * Default to empty string, that means to be used when no keycode is given.
+    *
+    * @return the action key
+    */
+   public String code() default "";
 }

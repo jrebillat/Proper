@@ -19,6 +19,18 @@ It is possible to link fields in the object to properties in the container and s
 For initial values, or values *not to be changed* it is possible to just initialize them with the current value of a property. This is less memory-consuming than the association.
 At the opposite, it is possible to bind properties in an element to a property in the container (either in the way container to element or bidirectional).
 
+## Named Containers
+It is sometimes easier not to have to worry about containers and work only with elements. You can achieve this with the named containers : containers instantiated automatically and stored in a map, to be referenced afterwards by their name.
+The system may create a special container class to hold data (the base PropertyConTainer may well be far enough for the work). It is then possible to not create any instance at all but let the system instantiate a PropertyContainer and store it along with a name. It is then possible to refer to the container to associate elements by its name. Furthermore, you do not have to request the container creation : it is created automatically before first association if it does not already exist.
+Named containers are accessible through static methods in the PropertyContainer class.
+
+## Association key codes
+It is sometimes interesting to associate an element to several containers, to have fields or methods related to different data sources. Thus it is possible to associate an element to several containers, differentiating them from o,e another by the association key codes (a String).
+The key code is given during element association to a container, to specify their relationship. Then all annotations will be process regarding this key code, that may be given as parameter on each annotation (Associate, Bind, Initialize, Manage and require). If a key code is given for the association, only annotations with this key code will be processed on this container.
+By default, the key code is the empty String "". Thus if you do not use any key code, in fact you are using the "" key code. One exception to this rule is the Manage annotation, which by default use the ActionManager.ALL_KEYCODES key code and make the annotated method to manage the action for all containers, regardless of the given key code. You may specify the ActionManager.DEFAUT_KEYCODE to make the method only manage default key code container actions.
+
+It is possible to associate a named container to element with a key code.
+
 ## The annotations
 ### @Require
 The @Require annotation is usable on any class type. It will make sure that a specified property exist in the container, with required type and, optionally, associated action.
@@ -28,21 +40,31 @@ The syntax is :
    key="property key"
    type=class type
    action="action key"
+   code="key code"
 )
 ```
 
 The *key* parameter is mandatory. This key will be used in code every time a reference to this property is needed, to get value, to set it, to add listener or any other work.
 The *type* parameter is mandatory. It is only use on the first requiring of this property, to select the content type for the Property. ** A work to do will be to verify the coherency in several calls **
 The *action* parameter is optional and, if present, will make the system trigger the action with the given name on each modification in the property value. See the @Manage annotation for more on actions.
+The *code* parameter is optional and, if present, contains the key code this annotation refers to.
 
 ### @Manage
 The @Manage annotation is usable on any instance method (even on private ones). It only work if the method expect no parameter or one parameter of a type compatible with the property value type. It will just inform the container to execute this method each time the corresponding action is triggered.
 The syntax is :
 ```java
-@Require("action key")
+@Manage("action key")
+```
+or
+```java
+@Manage(
+   value="action key"
+   code="key code"
+)
 ```
 
 The *action key* value is the key of the corresponding action, set on at least one @Require in one class (the container or any element).
+The *code* parameter is optional and, if present, contains the key code this annotation refers to.
 As said, the method must not expect more than one parameter (zero or one are OK). If a parameter is expected, it must be assignable from the property value type. The return type of the method is ignored.
 
 ### @Associate
@@ -51,8 +73,16 @@ The syntax is :
 ```java
 @Associate("property key")
 ```
+or
+```java
+@Associate(
+   value="property key"
+   code="key code"
+)
+```
 
 The *property key* value is the key of the corresponding property, set on at least one @Require in the class. The property must have a content value compatible with the field.
+The *code* parameter is optional and, if present, contains the key code this annotation refers to.
 
 ### @Initialize
 The @Initialize annotation is usable on any instance field (even on private ones). It only work if the field has a type compatible with the property value type to initialize with. It will just set the field value to the property content value at association. The value will not be affected afterwards, even if the property contant value is changed.
@@ -60,23 +90,35 @@ The syntax is :
 ```java
 @Initialize("property key")
 ```
+or
+```java
+@Initialize(
+   value="property key"
+   code="key code"
+)
+```
 
 The *property key* value is the key of the corresponding property, set on at least one @Require in the class. The property must have a content value compatible with the field and have been set to a intelligent value before element instance association with the container.
+The *code* parameter is optional and, if present, contains the key code this annotation refers to.
 
 ### @Bind
 The @Bind annotation is usable on any instance field that derives from a Property (even on private ones). It only work if the content object for the field property has a type compatible with the container property value type to bind with. It will just bind the two properties, either from container property to field property, or bidirectional.
 The syntax is :
 ```java
-@Bind("property key"
-bidirectional=true|false
+@Bind("property key")
+```
+or
+```java
+@Bind(
+   value="property key"
+   bidirectional=true|false
+   code="key code"
 )
 ```
 
 The *property key* value is the key of the corresponding container property, set on at least one @Require somewhere. The container property must have a content value compatible with the field property.
 The *bidirectional* parameter is optional and set to *false* by default. If set to true, the bind is bidirectional. By default or set to false, the bind will be from container property to field property.
-
-## Named containers
-It is sometimes easier not to have to worry about containers and work only with elements. You can achieve this with the named containers : containers instantiated automatically and stored in a map, to be referenced afterwards by their name.
+The *code* parameter is optional and, if present, contains the key code this annotation refers to.
 
 ## Simple example
 This is a simple basic (and useless) example that convert a integer in long and a long to double to print it.

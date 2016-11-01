@@ -1,4 +1,4 @@
-package net.alantea.proper.example;
+package net.alantea.proper.example1;
 
 import net.alantea.proper.Manage;
 import net.alantea.proper.Require;

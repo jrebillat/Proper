@@ -18,7 +18,14 @@ import java.util.Map;
  */
 public class ActionManager
 {
-   private static Map<String, ActionManager> namedManagers = new HashMap<>();;
+   /** The Constant ALL_KEYCODES. Use to specify that this may be applied to all managed containers for this method. */
+   public static final String ALL_KEYCODES = "__ALL_KEYCODES__";
+
+   /** The Constant DEFAULT_KEYCODE. Use to specify that this may be applied only to default container. */
+   public static final String DEFAULT_KEYCODE = "";
+   
+   private static Map<String, ActionManager> namedManagers = new HashMap<>();
+   
    /** The action map. */
    private Map<String, List<ObjectMethod>> actionMap;
    
@@ -42,7 +49,7 @@ public class ActionManager
       }
       actionMap = new LinkedHashMap<>();
 
-      associateActionMethods(this, getClass());
+      associateActionMethods(this, getClass(), "");
    }
    
    /**
@@ -73,7 +80,15 @@ public class ActionManager
    /**
     * Associate something with the named action manager.
     */
-   public static void associate(String managerName, Object element)
+   public static void associateNamedManager(String managerName, Object element)
+   {
+      associateNamedManager(managerName, "", element);
+   }
+   
+   /**
+    * Associate something with the named action manager.
+    */
+   public static void associateNamedManager(String managerName, String keyCode, Object element)
    {
       if ((managerName == null) || (element == null))
       {
@@ -82,7 +97,7 @@ public class ActionManager
       ActionManager manager = namedManagers.get(managerName);
       if (manager != null)
       {
-         manager.associateActionMethods(element, element.getClass());
+         manager.associateActionMethods(element, element.getClass(), keyCode);
       }
    }
    
@@ -91,9 +106,17 @@ public class ActionManager
     */
    public void associate(Object element)
    {
+      associate("", element);
+   }
+
+   /**
+    * Associate something with the action manager.
+    */
+   public void associate(String keyCode, Object element)
+   {
       if (element != null)
       {
-         associateActionMethods(element, element.getClass());
+         associateActionMethods(element, element.getClass(), keyCode);
       }
    }
 
@@ -101,9 +124,9 @@ public class ActionManager
     * Associate action methods.
     *
     * @param element the element
-    * @param cl the cl
+    * @param cl the class type
     */
-   protected void associateActionMethods(Object element, Class<?> cl)
+   protected void associateActionMethods(Object element, Class<?> cl, String keyCode)
    {
       if ((element == null) || (cl == null) || (!cl.isAssignableFrom(element.getClass())))
       {
@@ -118,18 +141,21 @@ public class ActionManager
             Manage[] manages = method.getAnnotationsByType(Manage.class);
             for (Manage manage : manages)
             {
-               String action = manage.value();
-               if ((action != null) && (action.length() > 0))
+               if ((ALL_KEYCODES.equals(manage.code())) || (manage.code().equals(keyCode)))
                {
-                  List<ObjectMethod> actionList = actionMap.get(action);
-                  if (actionList == null)
+                  String action = manage.value();
+                  if ((action != null) && (action.length() > 0))
                   {
-                     actionList = new ArrayList<>();
-                     actionMap.put(action, actionList);
-                  }
-                  if (method.getParameterCount() < 2)
-                  {
-                     actionList.add(new ObjectMethod(element, method, method.getParameterCount() == 1));
+                     List<ObjectMethod> actionList = actionMap.get(action);
+                     if (actionList == null)
+                     {
+                        actionList = new ArrayList<>();
+                        actionMap.put(action, actionList);
+                     }
+                     if (method.getParameterCount() < 2)
+                     {
+                        actionList.add(new ObjectMethod(element, method, method.getParameterCount() == 1));
+                     }
                   }
                }
             }
@@ -138,7 +164,7 @@ public class ActionManager
       cl = cl.getSuperclass();
       if (!Object.class.equals(cl))
       {
-         associateActionMethods(element, cl);
+         associateActionMethods(element, cl, keyCode);
       }
    }
    

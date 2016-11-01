@@ -1,4 +1,4 @@
-package net.alantea.proper.example;
+package net.alantea.proper.example1;
 
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;

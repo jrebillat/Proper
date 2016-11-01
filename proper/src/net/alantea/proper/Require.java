@@ -42,4 +42,12 @@ public @interface Require
     * @return the action key
     */
    public String action() default "";
+   
+   /**
+    * If not empty, specify this annotation to be used only when associating with this reference code.
+    * Default to empty string, that means to be used when no keycode is given.
+    *
+    * @return the action key
+    */
+   public String code() default "";
 }
