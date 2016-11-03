@@ -18,6 +18,7 @@ Any object may be associated with a container. But to realize the connection, we
 It is possible to link fields in the object to properties in the container and so share values. fields linked in elements will have their value changed to reflect the modifications in the corresponding property.
 For initial values, or values *not to be changed* it is possible to just initialize them with the current value of a property. This is less memory-consuming than the association.
 At the opposite, it is possible to bind properties in an element to a property in the container (either in the way container to element or bidirectional).
+It is possible to register the element in a property of the container, thus to give it a name during association.
 
 ## Named Containers
 It is sometimes easier not to have to worry about containers and work only with elements. You can achieve this with the named containers : containers instantiated automatically and stored in a map, to be referenced afterwards by their name.
@@ -41,12 +42,31 @@ The syntax is :
    type=class type
    action="action key"
    code="key code"
+   importFrom="key code"
 )
 ```
 
 The *key* parameter is mandatory. This key will be used in code every time a reference to this property is needed, to get value, to set it, to add listener or any other work.
 The *type* parameter is mandatory. It is only use on the first requiring of this property, to select the content type for the Property. ** A work to do will be to verify the coherency in several calls **
 The *action* parameter is optional and, if present, will make the system trigger the action with the given name on each modification in the property value. See the @Manage annotation for more on actions.
+The *code* parameter is optional and, if present, contains the key code this annotation refers to. The annotation will only be processed for this key code association.
+The *importFrom* parameter is optional and, if present, contains the key code this annotation refers to. The property from this key code association will be used to create and set a property with the same name in the default container.
+
+### @Register
+The @Register annotation is usable on any instance class definition. It will create or update a property in the container to store the element and refer to it in the code.
+The syntax is :
+```java
+@Register("name")
+```
+or
+```java
+@Register(
+   value="name"
+   code="key code"
+)
+```
+
+The *name* value is the property key in the container.
 The *code* parameter is optional and, if present, contains the key code this annotation refers to.
 
 ### @Manage

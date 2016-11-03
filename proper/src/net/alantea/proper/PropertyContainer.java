@@ -3,6 +3,7 @@ package net.alantea.proper;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,9 @@ public class PropertyContainer extends ActionManager
    /** The Constant PROP_THIS. Use to represent the container itself in the property list. */
    public static final String PROP_THIS = "PropertyContainerThis";
    
+   /** The standard component map. */
+   private static Map<Object, PropertyContainer> reference = new HashMap<>();
+   
    /** The properties. */
    private Map<String, ObjectProperty<Object>> properties;
    
@@ -74,6 +78,7 @@ public class PropertyContainer extends ActionManager
    public PropertyContainer(String name)
    {
       super(name);
+      reference.put(this, this);
       properties = new LinkedHashMap<>();
       fieldsMap = new LinkedHashMap<>();
       propertyActionsMap = new LinkedHashMap<>();
@@ -294,7 +299,10 @@ public class PropertyContainer extends ActionManager
       {
          properties.put(key, new SimpleObjectProperty<Object>(value));
       }
-      properties.get(key).set(value);
+      else
+      {
+         properties.get(key).set(value);
+      }
    }
    
    /**
@@ -321,11 +329,16 @@ public class PropertyContainer extends ActionManager
       {
          return;
       }
+      if ("".equals(keycode))
+      {
+         reference.put(element, this);
+      }
       createRequiredProperties(element, keycode);
       associateActionMethods(element, element.getClass(), keycode);
       associateFields(element, element.getClass(), keycode);
       initializeFields(element, element.getClass(), keycode);
       bindFields(element, element.getClass(), keycode);
+      registerItself(element, keycode);
    }
 
    /**
@@ -358,6 +371,37 @@ public class PropertyContainer extends ActionManager
                      propActions.add(annotation.action());
                   }
                }
+            }
+            if (annotation.importFrom().equals(keyCode))
+            {
+               if (reference.get(element) != null)
+               {
+                  Object fromValue = getPropertyValue(annotation.key());
+                  reference.get(element).setPropertyValue(annotation.key(), fromValue);
+               }
+            }
+         }
+      }
+   }
+
+   /**
+    * Registers an element with a property name in container.
+    * The properties found here are those from the Register type.
+    *
+    * @param element the element
+    * @param keyCode the key code
+    */
+   private void registerItself(Object element, String keyCode)
+   {
+      Class<?> cl = element.getClass();
+      if ((cl.isAnnotationPresent(Registers.class)) || (cl.isAnnotationPresent(Register.class)))
+      {
+         Register[] annotations = cl.getAnnotationsByType(Register.class);
+         for (Register annotation : annotations)
+         {
+            if (annotation.code().equals(keyCode))
+            {
+               setPropertyValue(annotation.value(), element);
             }
          }
       }
@@ -545,6 +589,14 @@ public class PropertyContainer extends ActionManager
       for (Require annotation : existing)
       {
          createProperty(annotation);
+         if (annotation.importFrom().equals(annotation.code()))
+         {
+            if (reference.get(this) != null)
+            {
+               Object fromValue = getPropertyValue(annotation.key());
+               reference.get(this).setPropertyValue(annotation.key(), fromValue);
+            }
+         }
       }
    }
    
@@ -555,15 +607,20 @@ public class PropertyContainer extends ActionManager
     */
    private void createProperty(Require annotation)
    {
-      if (!hasProperty(annotation.key(), annotation.type()))
+      createProperty(annotation.key(), annotation.type(), annotation.action());
+   }
+   
+   public void createProperty(String key, Class<?> type, String action)
+   {
+      if (!hasProperty(key, type))
       {
-         Object value = getDefaultValueForClass(annotation.type());
-         setPropertyValue(annotation.key(), value);
+         Object value = getDefaultValueForClass(type);
+         setPropertyValue(key, value);
 
-       addPropertyListener(annotation.key(),
+       addPropertyListener(key,
              (v, o, n) ->
        {
-          List<ObjectField> propFields = fieldsMap.get(annotation.key());
+          List<ObjectField> propFields = fieldsMap.get(key);
           if (propFields != null)
           {
              for(ObjectField field : propFields)
@@ -580,27 +637,27 @@ public class PropertyContainer extends ActionManager
              }
           }
           
-          List<String> propActions = propertyActionsMap.get(annotation.key());
+          List<String> propActions = propertyActionsMap.get(key);
           if (propActions != null)
           {
-             for(String action : propActions)
+             for(String propAction : propActions)
              {
-                execute(action, n);
+                execute(propAction, n);
              }
           }
        });
 
-       if (!"".equals(annotation.action()))
+       if (!"".equals(action))
        {
-          List<String> propActions = propertyActionsMap.get(annotation.key());
+          List<String> propActions = propertyActionsMap.get(key);
           if (propActions == null)
           {
              propActions = new ArrayList<>();
-             propertyActionsMap.put(annotation.key(), propActions);
+             propertyActionsMap.put(key, propActions);
           }
-          if (! propActions.contains(annotation.action()))
+          if (! propActions.contains(action))
           {
-             propActions.add(annotation.action());
+             propActions.add(action);
           }
        }
       }

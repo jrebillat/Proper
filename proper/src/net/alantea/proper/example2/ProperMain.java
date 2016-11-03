@@ -1,6 +1,5 @@
 package net.alantea.proper.example2;
 
-import net.alantea.proper.ActionManager;
 import net.alantea.proper.example1.Container;
 
 public class ProperMain
