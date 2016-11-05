@@ -14,23 +14,18 @@ class ObjectMethod
    
    /** The method. */
    private Method method;
-   
-   /** The needs parameters. */
-   private boolean needsParameters = false;
 
    /**
     * Instantiates a new object method.
     *
     * @param object the object
     * @param method the method
-    * @param needsParameters indicates if the method needs parameters
     */
-   ObjectMethod(Object object, Method method, boolean needsParameters)
+   ObjectMethod(Object object, Method method)
    {
       super();
       this.object = object;
       this.method = method;
-      this.needsParameters = needsParameters;
    }
 
    /**
@@ -51,15 +46,5 @@ class ObjectMethod
    Method getMethod()
    {
       return method;
-   }
-
-   /**
-    * Checks if is needs parameters.
-    *
-    * @return true, if is needs parameters
-    */
-   boolean isNeedsParameters()
-   {
-      return needsParameters;
    }
 }

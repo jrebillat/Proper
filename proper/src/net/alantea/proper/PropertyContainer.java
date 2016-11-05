@@ -240,7 +240,7 @@ public class PropertyContainer extends ActionManager
    @SuppressWarnings("unchecked")
    public final <T> ObjectProperty<T> getProperty(String key)
    {
-      return (key != null) ? (ObjectProperty<T>) properties.get(key) : null;
+      return (key != null) ? (ObjectProperty<T>)properties.get(key) : null;
    }
    
    /**
@@ -347,6 +347,7 @@ public class PropertyContainer extends ActionManager
     *
     * @param element the element
     */
+   @SuppressWarnings("unchecked")
    private void createRequiredProperties(Object element, String keyCode)
    {
       Class<?> cl = element.getClass();
@@ -376,8 +377,20 @@ public class PropertyContainer extends ActionManager
             {
                if (reference.get(element) != null)
                {
-                  Object fromValue = getPropertyValue(annotation.key());
-                  reference.get(element).setPropertyValue(annotation.key(), fromValue);
+                  PropertyContainer container = reference.get(element);
+                  if (annotation.bound())
+                  {
+                     @SuppressWarnings("rawtypes")
+                     Property fromProperty = getProperty(annotation.key());
+                     @SuppressWarnings("rawtypes")
+                     Property toProperty = container.getProperty(annotation.key());
+                     toProperty.bind(fromProperty);
+                  }
+                  else
+                  {
+                     Object fromValue = getPropertyValue(annotation.key());
+                     container.setPropertyValue(annotation.key(), fromValue);
+                  }
                }
             }
          }
@@ -583,6 +596,7 @@ public class PropertyContainer extends ActionManager
    /**
     * Creates the properties.
     */
+   @SuppressWarnings("unchecked")
    private void createProperties()
    {
       Require[] existing = getClass().getAnnotationsByType(Require.class);
@@ -593,8 +607,20 @@ public class PropertyContainer extends ActionManager
          {
             if (reference.get(this) != null)
             {
-               Object fromValue = getPropertyValue(annotation.key());
-               reference.get(this).setPropertyValue(annotation.key(), fromValue);
+               PropertyContainer container = reference.get(this);
+               if (annotation.bound())
+               {
+                  @SuppressWarnings("rawtypes")
+                  Property fromProperty = getProperty(annotation.key());
+                  @SuppressWarnings("rawtypes")
+                  Property toProperty = container.getProperty(annotation.key());
+                  toProperty.bind(fromProperty);
+               }
+               else
+               {
+                  Object fromValue = getPropertyValue(annotation.key());
+                  container.setPropertyValue(annotation.key(), fromValue);
+               }
             }
          }
       }
@@ -607,15 +633,20 @@ public class PropertyContainer extends ActionManager
     */
    private void createProperty(Require annotation)
    {
-      createProperty(annotation.key(), annotation.type(), annotation.action());
+      createProperty(annotation.key(), annotation.type(), annotation.action(), annotation.associate());
    }
    
-   public void createProperty(String key, Class<?> type, String action)
+   public void createProperty(String key, Class<?> type, String action, boolean associate)
    {
       if (!hasProperty(key, type))
       {
          Object value = getDefaultValueForClass(type);
          setPropertyValue(key, value);
+         
+         if (associate)
+         {
+            associate(value);
+         }
 
        addPropertyListener(key,
              (v, o, n) ->

@@ -3,6 +3,7 @@ package net.alantea.proper;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -152,10 +153,7 @@ public class ActionManager
                         actionList = new ArrayList<>();
                         actionMap.put(action, actionList);
                      }
-                     if (method.getParameterCount() < 2)
-                     {
-                        actionList.add(new ObjectMethod(element, method, method.getParameterCount() == 1));
-                     }
+                     actionList.add(new ObjectMethod(element, method));
                   }
                }
             }
@@ -167,33 +165,70 @@ public class ActionManager
          associateActionMethods(element, cl, keyCode);
       }
    }
-   
-   /**
-    * Execute, using only methods with no parameters.
-    *
-    * @param actionKey the action key
-    */
-   public final void execute(String actionKey)
-   {
-      if ((actionKey != null) && (actionKey.length() > 0))
-      {
-         execute(actionKey, null, false);
-      }
-   }
-   
-   /**
-    * Execute, using methods with zero or one parameter.
-    *
-    * @param actionKey the action key
-    * @param actionContent the action content
-    */
-   public final void execute(String actionKey, Object actionContent)
-   {
-      if ((actionKey != null) && (actionKey.length() > 0))
-      {
-         execute(actionKey, actionContent, true);
-      }
-   }
+//   
+//   /**
+//    * Execute, using only methods with no parameters.
+//    *
+//    * @param actionKey the action key
+//    */
+//   public final void execute(String actionKey)
+//   {
+//      if ((actionKey != null) && (actionKey.length() > 0))
+//      {
+//         execute(actionKey, null, false);
+//      }
+//   }
+//   
+//   /**
+//    * Execute, using methods with zero or one parameter.
+//    *
+//    * @param actionKey the action key
+//    * @param actionContent the action content
+//    */
+//   public final void execute(String actionKey, Object actionContent)
+//   {
+//      if ((actionKey != null) && (actionKey.length() > 0))
+//      {
+//         execute(actionKey, actionContent, true);
+//      }
+//   }
+//   
+//   /**
+//    * Execute.
+//    *
+//    * @param actionKey the action key
+//    * @param actionContent the action content
+//    * @param useParameter the use parameter flag
+//    */
+//   private final void execute(String actionKey, Object actionContent, boolean useParameter)
+//   {
+//      List<ObjectMethod> actionList = actionMap.get(actionKey);
+//      if (actionList != null)
+//      {
+//         for (ObjectMethod exe : actionList)
+//         {
+//            try
+//            {
+//               if (exe.isNeedsParameters())
+//               {
+//                  if (useParameter)
+//                  {
+//                     exe.getMethod().invoke(exe.getObject(), actionContent);
+//                  }
+//               }
+//               else
+//               {
+//                  exe.getMethod().invoke(exe.getObject());
+//               }
+//            }
+//            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+//            {
+//               // TODO Auto-generated catch block
+//               e.printStackTrace();
+//            }
+//         }
+//      }
+//   }
    
    /**
     * Execute.
@@ -202,23 +237,22 @@ public class ActionManager
     * @param actionContent the action content
     * @param useParameter the use parameter flag
     */
-   private final void execute(String actionKey, Object actionContent, boolean useParameter)
+   public final void execute(String actionKey, Object... parameters)
    {
       List<ObjectMethod> actionList = actionMap.get(actionKey);
       if (actionList != null)
       {
-         for (ObjectMethod exe : actionList)
+         List<ObjectMethod> list = Collections.unmodifiableList(actionList);
+         for (ObjectMethod exe : list)
          {
             try
             {
-               if (exe.isNeedsParameters())
+               Method method = exe.getMethod();
+               if ( parameters.length == method.getParameterCount())
                {
-                  if (useParameter)
-                  {
-                     exe.getMethod().invoke(exe.getObject(), actionContent);
-                  }
+                  exe.getMethod().invoke(exe.getObject(), parameters);
                }
-               else
+               else if (method.getParameterCount() == 0)
                {
                   exe.getMethod().invoke(exe.getObject());
                }

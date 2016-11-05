@@ -43,6 +43,7 @@ The syntax is :
    action="action key"
    code="key code"
    importFrom="key code"
+   bound=true|false
 )
 ```
 
@@ -51,9 +52,10 @@ The *type* parameter is mandatory. It is only use on the first requiring of this
 The *action* parameter is optional and, if present, will make the system trigger the action with the given name on each modification in the property value. See the @Manage annotation for more on actions.
 The *code* parameter is optional and, if present, contains the key code this annotation refers to. The annotation will only be processed for this key code association.
 The *importFrom* parameter is optional and, if present, contains the key code this annotation refers to. The property from this key code association will be used to create and set a property with the same name in the default container.
+The *bound* parameter is optional and only meaningful if *importFrom* is also there. If true, the property in, the default container property will be bound to this key code . This annotation parameter default to *false*.
 
 ### @Register
-The @Register annotation is usable on any instance class definition. It will create or update a property in the container to store the element and refer to it in the code.
+The @Register annotation is usable on any instance class definition and field. It will create or update a property in the container to store the element instance (itself for the element and the field's content for fields) and refer to it in the code.
 The syntax is :
 ```java
 @Register("name")
