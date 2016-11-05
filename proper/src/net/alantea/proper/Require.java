@@ -50,4 +50,25 @@ public @interface Require
     * @return the action key
     */
    public String code() default "";
+   
+   /**
+    * Import from key code container into default container.
+    *
+    * @return the string
+    */
+   public String importFrom() default "";
+   
+   /**
+    * Associate when creating.
+    *
+    * @return true, if successful
+    */
+   public boolean associate() default false;
+   
+   /**
+    * Bind with key code container's property when creating. Only concerned if 'associate' is true.
+    *
+    * @return true, if successful
+    */
+   public boolean bound() default false;
 }

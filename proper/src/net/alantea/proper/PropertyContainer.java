@@ -424,7 +424,7 @@ public class PropertyContainer extends ActionManager
     * Associate fields.
     *
     * @param element the element
-    * @param cl the cl
+    * @param cl the class
     */
    private void associateFields(Object element, Class<?> cl, String keyCode)
    {
