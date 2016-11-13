@@ -49,9 +49,17 @@ public class PropertyContainer extends ActionManager
    
    /** The Constant PROP_THIS. Use to represent the container itself in the property list. */
    public static final String PROP_THIS = "PropertyContainerThis";
+
+   public static final String MESS_ASSOCIATE = "PropertyContainerAssociate";
+   
+   private static final String PROPERTIESMAP_NAME = "__PropertyContainer__reference";
+   
+   private static final String FIELDSMAP_NAME = "__PropertyContainer__fieldsMap";
+   
+   private static final String ACTIONSMAP_NAME = "__PropertyContainer__actionsMap";
    
    /** The standard component map. */
-   private static Map<Object, PropertyContainer> reference = new HashMap<>();
+   private static Map<Object, Object> reference = new HashMap<>();
    
    /** The properties. */
    private Map<String, ObjectProperty<Object>> properties;
@@ -83,9 +91,8 @@ public class PropertyContainer extends ActionManager
       fieldsMap = new LinkedHashMap<>();
       propertyActionsMap = new LinkedHashMap<>();
 
-      setPropertyValue(PROP_THIS, this);
-      createProperties();
-      associateActionMethods(this, getClass(), "");
+      setPropertyValue(this, PROP_THIS, this);
+      createProperties(this);
    }
    
    /**
@@ -98,8 +105,35 @@ public class PropertyContainer extends ActionManager
       this();
       for (Object toAssociate : toBeAssociated)
       {
-         associate(toAssociate);
+         associate(this, toAssociate);
       }
+   }
+   
+   private static Map<String, ObjectProperty<Object>> getPropertiesMap(Object object)
+   {
+      if (object instanceof PropertyContainer)
+      {
+         return ((PropertyContainer)object).properties;
+      }
+      return getGrownField(object, PROPERTIESMAP_NAME);
+   }
+
+   private static Map<String, List<String>> getActionsMap(Object object)
+   {
+      if (object instanceof PropertyContainer)
+      {
+         return ((PropertyContainer)object).propertyActionsMap;
+      }
+      return getGrownField(object, ACTIONSMAP_NAME);
+   }
+   
+   private static Map<String, List<ObjectField>> getFieldsMap(Object object)
+   {
+      if (object instanceof PropertyContainer)
+      {
+         return ((PropertyContainer)object).fieldsMap;
+      }
+      return getGrownField(object, FIELDSMAP_NAME);
    }
    
    /**
@@ -151,7 +185,7 @@ public class PropertyContainer extends ActionManager
       
       if (element != null)
       {
-         container.associate(keycode, element);
+         PropertyContainer.associate(container, keycode, element);
       }
    }
    
@@ -163,13 +197,25 @@ public class PropertyContainer extends ActionManager
     */
    public final void addPropertyListener(String key, ChangeListener<Object> listener)
    {
-      if ((key != null) && (listener != null))
+      addPropertyListener(this, key, listener);
+   }
+   
+   /**
+    * Adds a property listener for the given property key.
+    *
+    * @param key the property key
+    * @param listener the change listener
+    */
+   public static final void addPropertyListener(Object container, String key, ChangeListener<Object> listener)
+   {
+      Map<String, ObjectProperty<Object>> props = getPropertiesMap(container);
+      if ((props != null) && (key != null) && (listener != null))
       {
-         if (!properties.containsKey(key))
+         if (!props.containsKey(key))
          {
-            setPropertyValue(key, null);
+            setPropertyValue(container, key, null);
          }
-         properties.get(key).addListener(listener);
+         props.get(key).addListener(listener);
       }
    }
    
@@ -181,9 +227,21 @@ public class PropertyContainer extends ActionManager
     */
    public final void removePropertyListener(String key, ChangeListener<Object> listener)
    {
-      if ((listener != null) && (key != null))
+      removePropertyListener(this, key, listener);
+   }
+   
+   /**
+    * Removes a property listener.
+    *
+    * @param key the property key to be desassociated.
+    * @param listener the listener
+    */
+   public static final void removePropertyListener(Object container, String key, ChangeListener<Object> listener)
+   {
+      Map<String, ObjectProperty<Object>> props = getPropertiesMap(container);
+      if ((props != null) && (listener != null) && (key != null))
       {
-         ObjectProperty<Object> entry = properties.get(key);
+         ObjectProperty<Object> entry = props.get(key);
          if (entry != null)
          {
             entry.removeListener(listener);
@@ -199,11 +257,23 @@ public class PropertyContainer extends ActionManager
     */
    public final boolean hasProperty(String key)
    {
-      if (key == null)
+      return hasProperty(this, key);
+   }
+   
+   /**
+    * Checks for property existence.
+    *
+    * @param key the property key
+    * @return true, if successful
+    */
+   public static final boolean hasProperty(Object container, String key)
+   {
+      Map<String, ObjectProperty<Object>> props = getPropertiesMap(container);
+      if (key == null || props == null)
       {
          return false;
       }
-      return properties.containsKey(key);
+      return props.containsKey(key);
    }
    
    /**
@@ -215,11 +285,24 @@ public class PropertyContainer extends ActionManager
     */
    public final boolean hasProperty(String key, Class<?> referenceClass)
    {
-      if ((referenceClass != null) && (key != null))
+      return hasProperty(this, key, referenceClass);
+   }
+   
+   /**
+    * Checks for existence of a property and check for coherent class assignment.
+    *
+    * @param key the key
+    * @param referenceClass the reference class
+    * @return true, if successful
+    */
+   public static final boolean hasProperty(Object container, String key, Class<?> referenceClass)
+   {
+      Map<String, ObjectProperty<Object>> props = getPropertiesMap(container);
+      if ((props != null) && (referenceClass != null) && (key != null))
       {
-         if (properties.containsKey(key))
+         if (props.containsKey(key))
          {
-            Object object = properties.get(key).get();
+            Object object = props.get(key).get();
             if (object == null)
             {
                return true;
@@ -237,10 +320,35 @@ public class PropertyContainer extends ActionManager
     * @param key the key
     * @return the property
     */
-   @SuppressWarnings("unchecked")
    public final <T> ObjectProperty<T> getProperty(String key)
    {
-      return (key != null) ? (ObjectProperty<T>)properties.get(key) : null;
+      return getProperty(this, key);
+   }
+
+   /**
+    * Gets the property.
+    *
+    * @param <T> the generic type
+    * @param key the key
+    * @return the property
+    */
+   @SuppressWarnings("unchecked")
+   public static final <T> ObjectProperty<T> getProperty(Object container, String key)
+   {
+      Map<String, ObjectProperty<Object>> props = getPropertiesMap(container);
+      return ((key != null) && (props != null)) ? (ObjectProperty<T>)props.get(key) : null;
+   }
+   
+   /**
+    * Gets the property value.
+    *
+    * @param <T> the generic type
+    * @param key the key
+    * @return the property value
+    */
+   public final <T> T getPropertyValue(String key)
+   {
+      return getPropertyValue(this, key);
    }
    
    /**
@@ -251,11 +359,12 @@ public class PropertyContainer extends ActionManager
     * @return the property value
     */
    @SuppressWarnings("unchecked")
-   public final <T> T getPropertyValue(String key)
+   public static final <T> T getPropertyValue(Object container, String key)
    {
-      if ((key != null) && (properties.containsKey(key)))
+      Map<String, ObjectProperty<Object>> props = getPropertiesMap(container);
+      if ((key != null) && (props != null) && (props.containsKey(key)))
       {
-         Object value = properties.get(key).get();
+         Object value = props.get(key).get();
          if (value != null)
          {
             return (T) value;
@@ -279,7 +388,7 @@ public class PropertyContainer extends ActionManager
       PropertyContainer container = getContainer(containerName);
       if (container != null)
       {
-         container.setPropertyValue(key, value);
+         setPropertyValue(container, key, value);
       }
    }
 
@@ -291,17 +400,29 @@ public class PropertyContainer extends ActionManager
     */
    public final void setPropertyValue(String key, Object value)
    {
-      if (key == null)
+      setPropertyValue(this, key, value);
+   }
+
+   /**
+    * Sets the property value.
+    *
+    * @param key the key
+    * @param value the value
+    */
+   public static final void setPropertyValue(Object container, String key, Object value)
+   {
+      Map<String, ObjectProperty<Object>> props = getPropertiesMap(container);
+      if ((key == null) || (props == null))
       {
          return;
       }
-      if (!properties.containsKey(key))
+      if (!props.containsKey(key))
       {
-         properties.put(key, new SimpleObjectProperty<Object>(value));
+         props.put(key, new SimpleObjectProperty<Object>(value));
       }
       else
       {
-         properties.get(key).set(value);
+         props.get(key).set(value);
       }
    }
    
@@ -320,10 +441,43 @@ public class PropertyContainer extends ActionManager
     */
    public final void associate(Object element)
    {
-      associate("", element);
+      associate(this, element);
+   }
+   
+   /**
+    * Associate something with the property container.
+    * It should have some annotations.
+    * The available annotations are :
+    *
+    * @Require(key="key string to define",
+    *          type= primitive class or any class type provided it has a constructor without arguments,
+    *          action="message identifier")
+    * Note : the 'action' parameter is an option. If present, it means that the action will be executed on property change.
+    * Entries for required properties will be created in property container at association if needed and initialized to default values.
+    * 
+    * @param element the element
+    */
+   public static final void associate(Object container, Object element)
+   {
+      associate(container, "", element);
    }
 
    public final void associate(String keycode, Object element)
+   {
+      associate(this, keycode, element);
+   }
+
+   public static final void associate(Object container, String keycode, Object element)
+   {
+      PropertyContainer.associateElement(container, keycode, element);
+   }
+
+   public final void associateElement(String keycode, Object element)
+   {
+      associateElement(this, keycode, element);
+   }
+
+   public final static void associateElement(Object container, String keycode, Object element)
    {
       if (element == null)
       {
@@ -331,14 +485,15 @@ public class PropertyContainer extends ActionManager
       }
       if ("".equals(keycode))
       {
-         reference.put(element, this);
+         reference.put(element, container);
       }
-      createRequiredProperties(element, keycode);
-      associateActionMethods(element, element.getClass(), keycode);
-      associateFields(element, element.getClass(), keycode);
-      initializeFields(element, element.getClass(), keycode);
-      bindFields(element, element.getClass(), keycode);
-      registerItself(element, keycode);
+      createRequiredProperties(container, element, keycode);
+      associateActionMethods(container, element, element.getClass(), keycode);
+      associateFields(container, element, element.getClass(), keycode);
+      initializeFields(container, element, element.getClass(), keycode);
+      bindFields(container, element, element.getClass(), keycode);
+      registerItself(container, element, keycode);
+      execute(container, MESS_ASSOCIATE, container, element);
    }
 
    /**
@@ -348,8 +503,12 @@ public class PropertyContainer extends ActionManager
     * @param element the element
     */
    @SuppressWarnings("unchecked")
-   private void createRequiredProperties(Object element, String keyCode)
+   private static void createRequiredProperties(Object container, Object element, String keyCode)
    {
+      Map<String, List<String>> actions = getActionsMap(container);
+      if (actions == null)
+         return;
+      
       Class<?> cl = element.getClass();
       if ((cl.isAnnotationPresent(Requires.class)) || (cl.isAnnotationPresent(Require.class)))
       {
@@ -358,14 +517,14 @@ public class PropertyContainer extends ActionManager
          {
             if (annotation.code().equals(keyCode))
             {
-               createProperty(annotation);
+               createProperty(container, annotation);
                if (!"".equals(annotation.action()))
                {
-                  List<String> propActions = propertyActionsMap.get(annotation.key());
+                  List<String> propActions = actions.get(annotation.key());
                   if (propActions == null)
                   {
                      propActions = new ArrayList<>();
-                     propertyActionsMap.put(annotation.key(), propActions);
+                     actions.put(annotation.key(), propActions);
                   }
                   if (! propActions.contains(annotation.action()))
                   {
@@ -377,19 +536,19 @@ public class PropertyContainer extends ActionManager
             {
                if (reference.get(element) != null)
                {
-                  PropertyContainer container = reference.get(element);
+                  Object refContainer = reference.get(element);
                   if (annotation.bound())
                   {
                      @SuppressWarnings("rawtypes")
-                     Property fromProperty = getProperty(annotation.key());
+                     Property fromProperty = getProperty(container, annotation.key());
                      @SuppressWarnings("rawtypes")
-                     Property toProperty = container.getProperty(annotation.key());
+                     Property toProperty = getProperty(refContainer, annotation.key());
                      toProperty.bind(fromProperty);
                   }
                   else
                   {
-                     Object fromValue = getPropertyValue(annotation.key());
-                     container.setPropertyValue(annotation.key(), fromValue);
+                     Object fromValue = getPropertyValue(container, annotation.key());
+                     setPropertyValue(refContainer, annotation.key(), fromValue);
                   }
                }
             }
@@ -404,7 +563,7 @@ public class PropertyContainer extends ActionManager
     * @param element the element
     * @param keyCode the key code
     */
-   private void registerItself(Object element, String keyCode)
+   private static void registerItself(Object container, Object element, String keyCode)
    {
       Class<?> cl = element.getClass();
       if ((cl.isAnnotationPresent(Registers.class)) || (cl.isAnnotationPresent(Register.class)))
@@ -414,7 +573,7 @@ public class PropertyContainer extends ActionManager
          {
             if (annotation.code().equals(keyCode))
             {
-               setPropertyValue(annotation.value(), element);
+               setPropertyValue(container, annotation.value(), element);
             }
          }
       }
@@ -426,7 +585,7 @@ public class PropertyContainer extends ActionManager
     * @param element the element
     * @param cl the class
     */
-   private void associateFields(Object element, Class<?> cl, String keyCode)
+   private static void associateFields(Object container, Object element, Class<?> cl, String keyCode)
    {
       for (Field field : cl.getDeclaredFields())
       {
@@ -436,11 +595,11 @@ public class PropertyContainer extends ActionManager
             Associate associates = field.getAnnotation(Associate.class);
             if (associates.code().equals(keyCode))
             {
-               if (!this.hasProperty(associates.value()))
+               if (!hasProperty(container, associates.value()))
                {
                   try
                   {
-                     setPropertyValue(associates.value(), field.get(element));
+                     setPropertyValue(container, associates.value(), field.get(element));
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
@@ -453,7 +612,7 @@ public class PropertyContainer extends ActionManager
                {
                   try
                   {
-                     field.set(element, getProperty(associates.value()).get());
+                     field.set(element, getProperty(container, associates.value()).get());
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
@@ -462,20 +621,24 @@ public class PropertyContainer extends ActionManager
                   }
                }
 
-               List<ObjectField> propFields = fieldsMap.get(associates.value());
-               if (propFields == null)
+               Map<String, List<ObjectField>> fields = getFieldsMap(container);
+               if (fields != null)
                {
-                  propFields = new ArrayList<>();
-                  fieldsMap.put(associates.value(), propFields);
+                  List<ObjectField> propFields = fields.get(associates.value());
+                  if (propFields == null)
+                  {
+                     propFields = new ArrayList<>();
+                     fields.put(associates.value(), propFields);
+                  }
+                  propFields.add(new ObjectField(element, field));
                }
-               propFields.add(new ObjectField(element, field));
             }
          }
       }
       cl = cl.getSuperclass();
       if (!Object.class.equals(cl))
       {
-         associateFields(element, cl, keyCode);
+         associateFields(container, element, cl, keyCode);
       }
    }
 
@@ -485,7 +648,7 @@ public class PropertyContainer extends ActionManager
     * @param element the element
     * @param cl the class
     */
-   private void initializeFields(Object element, Class<?> cl, String keyCode)
+   private static void initializeFields(Object container, Object element, Class<?> cl, String keyCode)
    {
       for (Field field : cl.getDeclaredFields())
       {
@@ -495,11 +658,11 @@ public class PropertyContainer extends ActionManager
             Initialize initialize = field.getAnnotation(Initialize.class);
             if (initialize.code().equals(keyCode))
             {
-               if (!this.hasProperty(initialize.value()))
+               if (!hasProperty(container, initialize.value()))
                {
                   try
                   {
-                     setPropertyValue(initialize.value(), field.get(element));
+                     setPropertyValue(container, initialize.value(), field.get(element));
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
@@ -512,7 +675,7 @@ public class PropertyContainer extends ActionManager
                {
                   try
                   {
-                     field.set(element, getProperty(initialize.value()).get());
+                     field.set(element, getProperty(container, initialize.value()).get());
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
@@ -526,7 +689,7 @@ public class PropertyContainer extends ActionManager
       cl = cl.getSuperclass();
       if (!Object.class.equals(cl))
       {
-         initializeFields(element, cl, keyCode);
+         initializeFields(container, element, cl, keyCode);
       }
    }
 
@@ -537,7 +700,7 @@ public class PropertyContainer extends ActionManager
     * @param cl the cl
     */
    @SuppressWarnings({ "unchecked", "rawtypes" })
-   private void bindFields(Object element, Class<?> cl, String keyCode)
+   private static void bindFields(Object container, Object element, Class<?> cl, String keyCode)
    {
       for (Field field : cl.getDeclaredFields())
       {
@@ -547,11 +710,11 @@ public class PropertyContainer extends ActionManager
             Bind associates = field.getAnnotation(Bind.class);
             if (associates.code().equals(keyCode))
             {
-               if (!this.hasProperty(associates.value()))
+               if (!hasProperty(container, associates.value()))
                {
                   try
                   {
-                     setPropertyValue(associates.value(), ((Property<?>) field.get(element)).getValue());
+                     setPropertyValue(container, associates.value(), ((Property<?>) field.get(element)).getValue());
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
@@ -561,7 +724,7 @@ public class PropertyContainer extends ActionManager
                }
             }
             
-            Property containerProperty = getProperty(associates.value());
+            Property containerProperty = getProperty(container, associates.value());
             Property elementProperty = null;
             try
             {
@@ -589,7 +752,7 @@ public class PropertyContainer extends ActionManager
       cl = cl.getSuperclass();
       if (!Object.class.equals(cl))
       {
-         associateFields(element, cl, keyCode);
+         associateFields(container, element, cl, keyCode);
       }
    }
 
@@ -597,29 +760,29 @@ public class PropertyContainer extends ActionManager
     * Creates the properties.
     */
    @SuppressWarnings("unchecked")
-   private void createProperties()
+   private static void createProperties(Object object)
    {
-      Require[] existing = getClass().getAnnotationsByType(Require.class);
+      Require[] existing = object.getClass().getAnnotationsByType(Require.class);
       for (Require annotation : existing)
       {
-         createProperty(annotation);
+         createProperty(object, annotation);
          if (annotation.importFrom().equals(annotation.code()))
          {
-            if (reference.get(this) != null)
+            if (reference.get(object) != null)
             {
-               PropertyContainer container = reference.get(this);
+               Object container = reference.get(object);
                if (annotation.bound())
                {
                   @SuppressWarnings("rawtypes")
-                  Property fromProperty = getProperty(annotation.key());
+                  Property fromProperty = getProperty(object, annotation.key());
                   @SuppressWarnings("rawtypes")
-                  Property toProperty = container.getProperty(annotation.key());
+                  Property toProperty = getProperty(container, annotation.key());
                   toProperty.bind(fromProperty);
                }
                else
                {
-                  Object fromValue = getPropertyValue(annotation.key());
-                  container.setPropertyValue(annotation.key(), fromValue);
+                  Object fromValue = getPropertyValue(object, annotation.key());
+                  setPropertyValue(container, annotation.key(), fromValue);
                }
             }
          }
@@ -631,27 +794,27 @@ public class PropertyContainer extends ActionManager
     *
     * @param annotation the annotation
     */
-   private void createProperty(Require annotation)
+   private static void createProperty(Object container, Require annotation)
    {
-      createProperty(annotation.key(), annotation.type(), annotation.action(), annotation.associate());
+      createProperty(container, annotation.key(), annotation.type(), annotation.action(), annotation.associate());
    }
    
-   public void createProperty(String key, Class<?> type, String action, boolean associate)
+   private static void createProperty(Object container, String key, Class<?> type, String action, boolean associate)
    {
-      if (!hasProperty(key, type))
+      if (!hasProperty(container, key, type))
       {
          Object value = getDefaultValueForClass(type);
-         setPropertyValue(key, value);
+         setPropertyValue(container, key, value);
          
          if (associate)
          {
-            associate(value);
+            associate(container, value);
          }
 
-       addPropertyListener(key,
+       addPropertyListener(container, key,
              (v, o, n) ->
        {
-          List<ObjectField> propFields = fieldsMap.get(key);
+          List<ObjectField> propFields = getFieldsMap(container).get(key);
           if (propFields != null)
           {
              for(ObjectField field : propFields)
@@ -668,23 +831,23 @@ public class PropertyContainer extends ActionManager
              }
           }
           
-          List<String> propActions = propertyActionsMap.get(key);
+          List<String> propActions = getActionsMap(container).get(key);
           if (propActions != null)
           {
              for(String propAction : propActions)
              {
-                execute(propAction, n);
+                execute(container, propAction, n);
              }
           }
        });
 
        if (!"".equals(action))
        {
-          List<String> propActions = propertyActionsMap.get(key);
+          List<String> propActions = getActionsMap(container).get(key);
           if (propActions == null)
           {
              propActions = new ArrayList<>();
-             propertyActionsMap.put(key, propActions);
+             getActionsMap(container).put(key, propActions);
           }
           if (! propActions.contains(action))
           {
@@ -700,7 +863,7 @@ public class PropertyContainer extends ActionManager
     * @param cl the cl
     * @return the default value for class
     */
-   private Object getDefaultValueForClass(Class<?> cl)
+   private static Object getDefaultValueForClass(Class<?> cl)
    {
       Object value = null;
 

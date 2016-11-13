@@ -142,6 +142,10 @@ The *property key* value is the key of the corresponding container property, set
 The *bidirectional* parameter is optional and set to *false* by default. If set to true, the bind is bidirectional. By default or set to false, the bind will be from container property to field property.
 The *code* parameter is optional and, if present, contains the key code this annotation refers to.
 
+## Using a PropertyContainer
+The methods to use to initialize, bind or associate elements are located in the PropertyContainer class.
+
+
 ## Simple example
 This is a simple basic (and useless) example that convert a integer in long and a long to double to print it.
 

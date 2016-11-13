@@ -25,7 +25,11 @@ public class ActionManager
    /** The Constant DEFAULT_KEYCODE. Use to specify that this may be applied only to default container. */
    public static final String DEFAULT_KEYCODE = "";
    
+   private static final String ACTIONMAP_NAME = "__ActionManager__actionMap";
+   
    private static Map<String, ActionManager> namedManagers = new HashMap<>();
+   
+   private static Map<Object, Map<String, Object>> grownFields = new HashMap<>();
    
    /** The action map. */
    private Map<String, List<ObjectMethod>> actionMap;
@@ -50,7 +54,7 @@ public class ActionManager
       }
       actionMap = new LinkedHashMap<>();
 
-      associateActionMethods(this, getClass(), "");
+      associateActionMethods(this, this, getClass(), "");
    }
    
    /**
@@ -63,8 +67,36 @@ public class ActionManager
       this();
       for (Object toAssociate : toBeAssociated)
       {
-         associate(toAssociate);
+         associate(this, toAssociate);
       }
+   }
+
+   private static Map<String, List<ObjectMethod>> getActionMap(Object object)
+   {
+      if (object instanceof PropertyContainer)
+      {
+         return ((ActionManager)object).actionMap;
+      }
+      return getGrownField(object, ACTIONMAP_NAME);
+   }
+
+   @SuppressWarnings("unchecked")
+   protected static <T> Map<String, T> getGrownField(Object object, String name)
+   {
+      Map<String, Object> map = grownFields.get(object);
+      if (map == null)
+      {
+         map = new HashMap<>();
+         grownFields.put(object,  map);
+      }
+
+      Map<String, T> ret = (Map<String, T>) map.get(name);
+      if (ret == null)
+      {
+         ret = new LinkedHashMap<>();
+         map.put(name, ret);
+      }
+      return  ret;
    }
    
    /**
@@ -98,8 +130,16 @@ public class ActionManager
       ActionManager manager = namedManagers.get(managerName);
       if (manager != null)
       {
-         manager.associateActionMethods(element, element.getClass(), keyCode);
+         associateActionMethods(manager, element, element.getClass(), keyCode);
       }
+   }
+   
+   /**
+    * Associate something with the action manager.
+    */
+   public static void associate(Object container, Object element)
+   {
+      associate(container, "", element);
    }
    
    /**
@@ -107,18 +147,26 @@ public class ActionManager
     */
    public void associate(Object element)
    {
-      associate("", element);
+      associate(this, element);
    }
 
    /**
     * Associate something with the action manager.
     */
-   public void associate(String keyCode, Object element)
+   public static void associate(Object container, String keyCode, Object element)
    {
       if (element != null)
       {
-         associateActionMethods(element, element.getClass(), keyCode);
+         associateActionMethods(container, element, element.getClass(), keyCode);
       }
+   }
+   
+   /**
+    * Associate something with the action manager.
+    */
+   public void associate(String keyCode, Object element)
+   {
+      associate(this, keyCode, element);
    }
 
    /**
@@ -127,7 +175,7 @@ public class ActionManager
     * @param element the element
     * @param cl the class type
     */
-   protected void associateActionMethods(Object element, Class<?> cl, String keyCode)
+   protected static void associateActionMethods(Object container, Object element, Class<?> cl, String keyCode)
    {
       if ((element == null) || (cl == null) || (!cl.isAssignableFrom(element.getClass())))
       {
@@ -147,11 +195,11 @@ public class ActionManager
                   String action = manage.value();
                   if ((action != null) && (action.length() > 0))
                   {
-                     List<ObjectMethod> actionList = actionMap.get(action);
+                     List<ObjectMethod> actionList = getActionMap(container).get(action);
                      if (actionList == null)
                      {
                         actionList = new ArrayList<>();
-                        actionMap.put(action, actionList);
+                        getActionMap(container).put(action, actionList);
                      }
                      actionList.add(new ObjectMethod(element, method));
                   }
@@ -162,73 +210,9 @@ public class ActionManager
       cl = cl.getSuperclass();
       if (!Object.class.equals(cl))
       {
-         associateActionMethods(element, cl, keyCode);
+         associateActionMethods(container, element, cl, keyCode);
       }
    }
-//   
-//   /**
-//    * Execute, using only methods with no parameters.
-//    *
-//    * @param actionKey the action key
-//    */
-//   public final void execute(String actionKey)
-//   {
-//      if ((actionKey != null) && (actionKey.length() > 0))
-//      {
-//         execute(actionKey, null, false);
-//      }
-//   }
-//   
-//   /**
-//    * Execute, using methods with zero or one parameter.
-//    *
-//    * @param actionKey the action key
-//    * @param actionContent the action content
-//    */
-//   public final void execute(String actionKey, Object actionContent)
-//   {
-//      if ((actionKey != null) && (actionKey.length() > 0))
-//      {
-//         execute(actionKey, actionContent, true);
-//      }
-//   }
-//   
-//   /**
-//    * Execute.
-//    *
-//    * @param actionKey the action key
-//    * @param actionContent the action content
-//    * @param useParameter the use parameter flag
-//    */
-//   private final void execute(String actionKey, Object actionContent, boolean useParameter)
-//   {
-//      List<ObjectMethod> actionList = actionMap.get(actionKey);
-//      if (actionList != null)
-//      {
-//         for (ObjectMethod exe : actionList)
-//         {
-//            try
-//            {
-//               if (exe.isNeedsParameters())
-//               {
-//                  if (useParameter)
-//                  {
-//                     exe.getMethod().invoke(exe.getObject(), actionContent);
-//                  }
-//               }
-//               else
-//               {
-//                  exe.getMethod().invoke(exe.getObject());
-//               }
-//            }
-//            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-//            {
-//               // TODO Auto-generated catch block
-//               e.printStackTrace();
-//            }
-//         }
-//      }
-//   }
    
    /**
     * Execute.
@@ -239,7 +223,19 @@ public class ActionManager
     */
    public final void execute(String actionKey, Object... parameters)
    {
-      List<ObjectMethod> actionList = actionMap.get(actionKey);
+      execute(this, actionKey, parameters);
+   }
+   
+   /**
+    * Execute.
+    *
+    * @param actionKey the action key
+    * @param actionContent the action content
+    * @param useParameter the use parameter flag
+    */
+   public static final void execute(Object container, String actionKey, Object... parameters)
+   {
+      List<ObjectMethod> actionList = getActionMap(container).get(actionKey);
       if (actionList != null)
       {
          List<ObjectMethod> list = Collections.unmodifiableList(actionList);

@@ -1,4 +1,4 @@
-package net.alantea.proper.example1;
+package net.alantea.proper.example4;
 
 import net.alantea.proper.Associate;
 import net.alantea.proper.Initialize;

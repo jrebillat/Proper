@@ -1,4 +1,4 @@
-package net.alantea.proper.example1;
+package net.alantea.proper.example4;
 
 import net.alantea.proper.PropertyContainer;
 import net.alantea.proper.Require;
@@ -12,12 +12,12 @@ public class Container extends PropertyContainer
    public static void main(String[] args)
    {
       Container cont = new Container();
-      PropertyContainer.associate(cont, new IntegerToLongConverter());
-      PropertyContainer.associate(cont, new LongToDoubleConverter());
-      PropertyContainer.associate(cont, new DoublePrinter());
+      cont.associate(new IntegerToLongConverter());
+      cont.associate(new LongToDoubleConverter());
+      cont.associate(new DoublePrinter());
       
-      Container.setPropertyValue(cont, PROP_ONE, 1);
-      Container.setPropertyValue(cont, PROP_ONE, 2);
-      Container.setPropertyValue(cont, PROP_ONE, 3);
+      cont.setPropertyValue(PROP_ONE, 1);
+      cont.setPropertyValue(PROP_ONE, 2);
+      cont.setPropertyValue(PROP_ONE, 3);
    }
 }
