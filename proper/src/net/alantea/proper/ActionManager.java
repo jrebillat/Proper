@@ -3,6 +3,7 @@ package net.alantea.proper;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -167,6 +168,27 @@ public class ActionManager
    public void associate(String keyCode, Object element)
    {
       associate(this, keyCode, element);
+   }
+   
+   public void forget(Object object)
+   {
+      forget(this, object);
+   }
+   
+   public static void forget(Object container, Object object)
+   {
+      if (object != null)
+      {
+         grownFields.remove(object);
+         Collection<String> collection = Collections.unmodifiableCollection(namedManagers.keySet());
+         for (String key : collection)
+         {
+            if (namedManagers.get(key).equals(object))
+            {
+               namedManagers.remove(key);
+            }
+         }
+      }
    }
 
    /**

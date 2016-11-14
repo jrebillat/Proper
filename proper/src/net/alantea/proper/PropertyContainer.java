@@ -3,6 +3,8 @@ package net.alantea.proper;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -494,6 +496,26 @@ public class PropertyContainer extends ActionManager
       bindFields(container, element, element.getClass(), keycode);
       registerItself(container, element, keycode);
       execute(container, MESS_ASSOCIATE, container, element);
+   }
+   
+   public void forget(Object object)
+   {
+      if (object != null)
+      {
+         reference.remove(object);
+         Collection<Object> collection = Collections.unmodifiableCollection(reference.keySet());
+         for (Object key : collection)
+         {
+            if (reference.get(key).equals(object))
+            {
+               reference.remove(key);
+            }
+            if (reference.equals(object))
+            {
+               reference.remove(key);
+            }
+         }
+      }
    }
 
    /**
