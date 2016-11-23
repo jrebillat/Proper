@@ -68,7 +68,7 @@ public class ActionManager
       this();
       for (Object toAssociate : toBeAssociated)
       {
-         associate(this, toAssociate);
+         associateActions(this, toAssociate);
       }
    }
 
@@ -138,23 +138,23 @@ public class ActionManager
    /**
     * Associate something with the action manager.
     */
-   public static void associate(Object container, Object element)
+   public static void associateActions(Object container, Object element)
    {
-      associate(container, "", element);
+      associateActions(container, "", element);
    }
    
    /**
     * Associate something with the action manager.
     */
-   public void associate(Object element)
+   public void associateActions(Object element)
    {
-      associate(this, element);
+      associateActions(this, element);
    }
 
    /**
     * Associate something with the action manager.
     */
-   public static void associate(Object container, String keyCode, Object element)
+   public static void associateActions(Object container, String keyCode, Object element)
    {
       if (element != null)
       {
@@ -165,9 +165,9 @@ public class ActionManager
    /**
     * Associate something with the action manager.
     */
-   public void associate(String keyCode, Object element)
+   public void associateActions(String keyCode, Object element)
    {
-      associate(this, keyCode, element);
+      associateActions(this, keyCode, element);
    }
    
    public void forget(Object object)
@@ -223,6 +223,7 @@ public class ActionManager
                         actionList = new ArrayList<>();
                         getActionMap(container).put(action, actionList);
                      }
+                     method.setAccessible(true);
                      actionList.add(new ObjectMethod(element, method));
                   }
                }
@@ -268,6 +269,11 @@ public class ActionManager
                Method method = exe.getMethod();
                if ( parameters.length == method.getParameterCount())
                {
+//                  System.out.println("execute " + actionKey + " " + method);
+//                  for (Object param : parameters)
+//                  {
+//                     System.out.println("   " + param);
+//                  }
                   exe.getMethod().invoke(exe.getObject(), parameters);
                }
                else if (method.getParameterCount() == 0)

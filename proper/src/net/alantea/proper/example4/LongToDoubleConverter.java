@@ -24,6 +24,6 @@ public class LongToDoubleConverter
    private void actionGotLong()
    {
       System.out.println("got long : " + reference.longValue());
-      Container.setPropertyValue(container, LongToDoubleConverter.PROP_THREE, (double)reference.get());
+      container.setPropertyValue(LongToDoubleConverter.PROP_THREE, (double)reference.get());
    }
 }

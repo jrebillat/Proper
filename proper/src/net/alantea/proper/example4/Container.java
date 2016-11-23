@@ -1,10 +1,10 @@
 package net.alantea.proper.example4;
 
-import net.alantea.proper.PropertyContainer;
+import net.alantea.proper.MappedPropertyContainer;
 import net.alantea.proper.Require;
 
 @Require(key=Container.PROP_ONE, type=Integer.class, action=Container.ACT_GOTINTEGER)
-public class Container extends PropertyContainer
+public class Container extends MappedPropertyContainer
 {
    public static final String PROP_ONE = "PropertyOne";
    public static final String ACT_GOTINTEGER = "GotInteger";

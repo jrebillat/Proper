@@ -21,6 +21,6 @@ public class IntegerToLongConverter
    private void actionGotInteger()
    {
       System.out.println("got integer : " + reference);
-      Container.setPropertyValue(container, IntegerToLongConverter.PROP_TWO, (long)reference);
+      container.setPropertyValue(IntegerToLongConverter.PROP_TWO, (long)reference);
    }
 }

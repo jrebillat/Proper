@@ -1,8 +1,8 @@
-package net.alantea.proper.example3;
+package net.alantea.proper.example5;
 
 import net.alantea.proper.MappedPropertyContainer;
 
-public class AutoMain
+public class ManagedMain
 {
    public static final String PROP_ONE = "PropertyOne";
    public static final String PROP_TWO = "PropertyTwo";
@@ -16,7 +16,6 @@ public class AutoMain
       
       OutputPrinter printer = new OutputPrinter();
       MappedPropertyContainer.associateHook(cont1, "Container1", printer);
-      
       MappedPropertyContainer.associateHook(cont2, "Container2", printer);
       MappedPropertyContainer.associateHook("HiddenContainer", "", printer);
       
