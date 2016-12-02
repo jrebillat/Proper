@@ -3,14 +3,16 @@ package net.alantea.proper;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import net.alantea.proper.example5.OutputPrinter;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class PropertyContainer.
  * A property container instance is the root part of some elements associated with it and working with a common set of properties.
@@ -69,6 +71,17 @@ public class MappedPropertyContainer extends PropertyContainer
    }
    
    /**
+    * Instantiates a new container.
+    *
+    * @param name the name for container
+    */
+   public MappedPropertyContainer(String name, Map<String, Object> properties)
+   {
+      super(name);
+      mapProperties(properties);
+   }
+   
+   /**
     * Instantiates a new property container and associate a list of elements to it.
     *
     * @param toBeAssociated the elements to be associated. They should use the annotations to be fully associated.
@@ -82,6 +95,9 @@ public class MappedPropertyContainer extends PropertyContainer
       }
    }
    
+   /* (non-Javadoc)
+    * @see net.alantea.proper.PropertyContainer#doAssociation(java.lang.String, java.lang.Object)
+    */
    public void doAssociation(String keycode, Object element)
    {
       bindFields(element, element.getClass(), keycode);
@@ -90,7 +106,7 @@ public class MappedPropertyContainer extends PropertyContainer
    /**
     * Gets the named manager.
     *
-    * @param name the name
+    * @param hook the hook
     * @return the manager
     */
    public static MappedPropertyContainer getContainer(Object hook)
@@ -158,6 +174,22 @@ public class MappedPropertyContainer extends PropertyContainer
          }
       }
       return false;
+   }
+   
+   /**
+    * Gets the property keys.
+    *
+    * @return the property keys list
+    */
+   public final List<String> getPropertyKeys()
+   {
+      if (properties == null)
+      {
+         properties = new LinkedHashMap<>();
+      }
+      List<String> ret = new LinkedList<>();
+      ret.addAll(properties.keySet());
+      return ret;
    }
    
    /**
@@ -256,6 +288,9 @@ public class MappedPropertyContainer extends PropertyContainer
       }
    }
    
+   /* (non-Javadoc)
+    * @see net.alantea.proper.PropertyContainer#bindProperty(java.lang.String, net.alantea.proper.PropertyContainer, java.lang.String)
+    */
    @SuppressWarnings("unchecked")
    public void bindProperty(String localKey, PropertyContainer source, String originKey)
    {
@@ -271,6 +306,7 @@ public class MappedPropertyContainer extends PropertyContainer
     *
     * @param element the element
     * @param cl the cl
+    * @param keyCode the key code
     */
    @SuppressWarnings({ "unchecked", "rawtypes" })
    private void bindFields(Object element, Class<?> cl, String keyCode)
@@ -329,16 +365,48 @@ public class MappedPropertyContainer extends PropertyContainer
       }
    }
 
+   /**
+    * Gets the property.
+    *
+    * @param value the value
+    * @return the property
+    */
    public ObjectProperty<?> getProperty(String value)
    {
       return properties.get(value);
    }
 
+   /**
+    * Sets the property.
+    *
+    * @param key the key
+    * @param value the value
+    */
    public void setProperty(String key, Object value)
    {
       properties.put(key, new SimpleObjectProperty<Object>(value));
    }
+   
+   /**
+    * Map properties.
+    *
+    * @param map the map
+    */
+   public void mapProperties(Map<String, Object> map)
+   {
+      for (String key : map.keySet())
+      {
+         setProperty(key, map.get(key));
+      }
+   }
 
+   /**
+    * Associate hook.
+    *
+    * @param hook the hook
+    * @param key the key
+    * @param element the element
+    */
    public static void associateHook(Object hook, String key, Object element)
    {
       if (hook instanceof MappedPropertyContainer)
@@ -356,6 +424,13 @@ public class MappedPropertyContainer extends PropertyContainer
       hidden.associate(key, element);
    }
 
+   /**
+    * Sets the property value.
+    *
+    * @param hook the hook
+    * @param key the key
+    * @param value the value
+    */
    public static void setPropertyValue(Object hook, String key, Object value)
    {
       if (hook instanceof MappedPropertyContainer)
@@ -373,6 +448,12 @@ public class MappedPropertyContainer extends PropertyContainer
       hidden.setPropertyValue(key, value);
    }
 
+   /**
+    * Gets the hook.
+    *
+    * @param container the container
+    * @return the hook
+    */
    public Object getHook(PropertyContainer container)
    {
       if (! metaProperties.containsValue(container))
