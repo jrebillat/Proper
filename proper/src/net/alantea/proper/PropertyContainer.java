@@ -301,7 +301,17 @@ public abstract class PropertyContainer extends ActionManager
     */
    private void createRequiredProperties(Object element, String keyCode)
    {
-      Class<?> cl = element.getClass();
+      createRequiredProperties(element, element.getClass(), keyCode);
+   }
+
+   /**
+    * Creates the required properties for the element.
+    * The properties found here are those from the Require type.
+    *
+    * @param element the element
+    */
+   private void createRequiredProperties(Object element, Class<?> cl, String keyCode)
+   {
       if ((cl.isAnnotationPresent(Requires.class)) || (cl.isAnnotationPresent(Require.class)))
       {
          Require[] annotations = cl.getAnnotationsByType(Require.class);
@@ -342,6 +352,10 @@ public abstract class PropertyContainer extends ActionManager
             }
          }
       }
+      if (!cl.equals(Object.class))
+      {
+         createRequiredProperties(element, cl.getSuperclass(), keyCode);
+      }
    }
 
    /**
@@ -353,17 +367,33 @@ public abstract class PropertyContainer extends ActionManager
     */
    private void registerItself(Object element, String keyCode)
    {
-      Class<?> cl = element.getClass();
+      registerItself(element, element.getClass(), keyCode);
+   }
+
+   /**
+    * Registers an element with a property name in container.
+    * The properties found here are those from the Register type.
+    *
+    * @param element the element
+    * @param keyCode the key code
+    */
+   private void registerItself(Object element, Class<?> cl, String keyCode)
+   {
       if ((cl.isAnnotationPresent(Registers.class)) || (cl.isAnnotationPresent(Register.class)))
       {
          Register[] annotations = cl.getAnnotationsByType(Register.class);
          for (Register annotation : annotations)
          {
+            System.out.println(annotation.value() + " '" + annotation.code() + "'" );
             if ((annotation.code().equals(keyCode)) || (ALL_KEYCODES.equals(keyCode)))
             {
                setPropertyValue(annotation.value(), element);
             }
          }
+      }
+      if (!cl.equals(Object.class))
+      {
+         registerItself(element, cl.getSuperclass(), keyCode);
       }
    }
 
@@ -377,7 +407,19 @@ public abstract class PropertyContainer extends ActionManager
     */
    private void manageRegistry(Object element, String keyCode)
    {
-      Class<?> cl = element.getClass();
+      manageRegistry(element, element.getClass(), keyCode);
+   }
+
+   /**
+    * Call a method in element to finalize the register process in a container with a key code.
+    * The may do anything, but it should call some PropertyContainer methods to ass properties or so...
+    *
+    * @param container the container
+    * @param element the element
+    * @param keyCode the key code
+    */
+   private void manageRegistry(Object element, Class<?> cl, String keyCode)
+   {
       for (Method method : cl.getDeclaredMethods())
       {
          if ((method.isAnnotationPresent(ManageRegistry.class)))
@@ -407,6 +449,10 @@ public abstract class PropertyContainer extends ActionManager
                }
             }
          }
+      }
+      if (!cl.equals(Object.class))
+      {
+         manageRegistry(element, cl.getSuperclass(), keyCode);
       }
    }
 
@@ -466,10 +512,9 @@ public abstract class PropertyContainer extends ActionManager
             }
          }
       }
-      cl = cl.getSuperclass();
       if (!Object.class.equals(cl))
       {
-         associateFields(element, cl, keyCode);
+         associateFields(element, cl.getSuperclass(), keyCode);
       }
    }
 
@@ -517,10 +562,9 @@ public abstract class PropertyContainer extends ActionManager
             }
          }
       }
-      cl = cl.getSuperclass();
       if (!Object.class.equals(cl))
       {
-         initializeFields(element, cl, keyCode);
+         initializeFields(element, cl.getSuperclass(), keyCode);
       }
    }
 
@@ -529,7 +573,15 @@ public abstract class PropertyContainer extends ActionManager
     */
    private void createProperties(Object object)
    {
-      Require[] existing = object.getClass().getAnnotationsByType(Require.class);
+      createProperties(object, object.getClass());
+   }
+
+   /**
+    * Creates the properties.
+    */
+   private void createProperties(Object object, Class<?> cl)
+   {
+      Require[] existing = cl.getAnnotationsByType(Require.class);
       for (Require annotation : existing)
       {
          createProperty(annotation);
@@ -549,6 +601,10 @@ public abstract class PropertyContainer extends ActionManager
                }
             }
          }
+      }
+      if (!Object.class.equals(cl))
+      {
+         createProperties(object, cl.getSuperclass());
       }
    }
    
