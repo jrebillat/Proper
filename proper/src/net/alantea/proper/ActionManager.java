@@ -15,7 +15,7 @@ import java.util.Map;
  * manage the named action.
  * 
  * Methods with  zero or one parameter in action manager or element class may be extended with one or more @Manage annotations :
- * @Manage("action key string").
+ *  Manage("action key string").
  * 
  */
 public class ActionManager
@@ -26,10 +26,13 @@ public class ActionManager
    /** The Constant DEFAULT_KEYCODE. Use to specify that this may be applied only to default container. */
    public static final String DEFAULT_KEYCODE = "";
    
+   /** The Constant ACTIONMAP_NAME. */
    private static final String ACTIONMAP_NAME = "__ActionManager__actionMap";
    
+   /** The named managers. */
    private static Map<String, ActionManager> namedManagers = new HashMap<>();
    
+   /** The grown fields. */
    private static Map<Object, Map<String, Object>> grownFields = new HashMap<>();
    
    /** The action map. */
@@ -45,6 +48,8 @@ public class ActionManager
    
    /**
     * Instantiates a new named action manager.
+    *
+    * @param name the name
     */
    public ActionManager(String name)
    {
@@ -72,6 +77,12 @@ public class ActionManager
       }
    }
 
+   /**
+    * Gets the action map.
+    *
+    * @param object the object
+    * @return the action map
+    */
    private static Map<String, List<ObjectMethod>> getActionMap(Object object)
    {
       if (object instanceof PropertyContainer)
@@ -81,6 +92,14 @@ public class ActionManager
       return getGrownField(object, ACTIONMAP_NAME);
    }
 
+   /**
+    * Gets the grown field.
+    *
+    * @param <T> the generic type
+    * @param object the object
+    * @param name the name
+    * @return the grown field
+    */
    @SuppressWarnings("unchecked")
    protected static <T> Map<String, T> getGrownField(Object object, String name)
    {
@@ -113,6 +132,9 @@ public class ActionManager
    
    /**
     * Associate something with the named action manager.
+    *
+    * @param managerName the manager name
+    * @param element the element
     */
    public static void associateNamedManager(String managerName, Object element)
    {
@@ -121,6 +143,10 @@ public class ActionManager
    
    /**
     * Associate something with the named action manager.
+    *
+    * @param managerName the manager name
+    * @param keyCode the key code
+    * @param element the element
     */
    public static void associateNamedManager(String managerName, String keyCode, Object element)
    {
@@ -137,6 +163,9 @@ public class ActionManager
    
    /**
     * Associate something with the action manager.
+    *
+    * @param container the container
+    * @param element the element
     */
    public static void associateActions(Object container, Object element)
    {
@@ -145,6 +174,8 @@ public class ActionManager
    
    /**
     * Associate something with the action manager.
+    *
+    * @param element the element
     */
    public void associateActions(Object element)
    {
@@ -153,6 +184,10 @@ public class ActionManager
 
    /**
     * Associate something with the action manager.
+    *
+    * @param container the container
+    * @param keyCode the key code
+    * @param element the element
     */
    public static void associateActions(Object container, String keyCode, Object element)
    {
@@ -164,17 +199,31 @@ public class ActionManager
    
    /**
     * Associate something with the action manager.
+    *
+    * @param keyCode the key code
+    * @param element the element
     */
    public void associateActions(String keyCode, Object element)
    {
       associateActions(this, keyCode, element);
    }
    
+   /**
+    * Forget.
+    *
+    * @param object the object
+    */
    public void forget(Object object)
    {
       forget(this, object);
    }
    
+   /**
+    * Forget.
+    *
+    * @param container the container
+    * @param object the object
+    */
    public static void forget(Object container, Object object)
    {
       if (object != null)
@@ -194,8 +243,10 @@ public class ActionManager
    /**
     * Associate action methods.
     *
+    * @param container the container
     * @param element the element
     * @param cl the class type
+    * @param keyCode the key code
     */
    protected static void associateActionMethods(Object container, Object element, Class<?> cl, String keyCode)
    {
@@ -241,8 +292,7 @@ public class ActionManager
     * Execute.
     *
     * @param actionKey the action key
-    * @param actionContent the action content
-    * @param useParameter the use parameter flag
+    * @param parameters the parameters
     */
    public final void execute(String actionKey, Object... parameters)
    {
@@ -252,9 +302,9 @@ public class ActionManager
    /**
     * Execute.
     *
+    * @param container the container
     * @param actionKey the action key
-    * @param actionContent the action content
-    * @param useParameter the use parameter flag
+    * @param parameters the parameters
     */
    public static final void execute(Object container, String actionKey, Object... parameters)
    {

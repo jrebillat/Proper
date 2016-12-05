@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class PropertyContainer.
  * A property container instance is the root part of some elements associated with it and working with a common set of properties.
@@ -23,25 +24,25 @@ import javafx.beans.value.ChangeListener;
  *  Both the property container and the elements must have annotations to ensure a correct association.
  * 
  * The property container or element class should be extended with @Require annotations :
- * @Require(key="key string to define", type= primitive class or any class type provided it has a constructor without arguments,
+ * Require(key="key string to define", type= primitive class or any class type provided it has a constructor without arguments,
  * action="action key"). The action parameter is an option.
  * Entries for required properties will be created and added to the container at instance creation and initialized to default values
  *  : 0 value for primitive types, false for booleans, "" for String and null for other object types.
  * 
  * Methods with  zero or one parameter in property container or element class may be extended with one or more @Manage annotations :
- * @Manage("action key string").
- * The action key may correspond to an 'action' parameter value in one or more @Require definition, in the property container,
+ * Manage("action key string").
+ * The action key may correspond to an 'action' parameter value in one or more Require definition, in the property container,
  * another associated element or even the same class. Each time the value of the property change, the annotated methods with the
  * action key in any element will be called. If a parameter is needed, the value passed to the method is the new property value.
  * But caution with it : there is no class compatibility verification here.
  * Methods with @Manage annotations in elements may also be called directly using the property container 'execute('action key', value).
  * 
- * Fields in elements may also have a single @Associate annotation : @Associate("property key"). If the property already exists in
+ * Fields in elements may also have a single @Associate annotation : Associate("property key"). If the property already exists in
  * the container, then the value of the field will be set to the field value. If not, then a new property with the field value is 
  * created. The field value will be set each time the property value change to reflect the new value. Changing the value of the field
  * will not change the property value.
  * 
- * Fields in elements may also have a single @Initialize annotation : @Initialize("property key"). If the property already exists in
+ * Fields in elements may also have a single @Initialize annotation : Initialize("property key"). If the property already exists in
  * the container, then the value of the field will be set at association to the current property value at that time. If not, then a new
  * property with the field value is created. Changes will not be reflected afterwards.
  */
@@ -51,11 +52,16 @@ public abstract class PropertyContainer extends ActionManager
    /** The Constant PROP_THIS. Use to represent the container itself in the property list. */
    public static final String PROP_THIS = "PropertyContainerThis";
 
+   /** The Constant MESS_ASSOCIATE. */
    public static final String MESS_ASSOCIATE = "PropertyContainerAssociate";
+   
+   /** The Constant MESS_SETVALUE. */
    public static final String MESS_SETVALUE = "PropertyContainerSetValue";
       
+   /** The Constant FIELDSMAP_NAME. */
    private static final String FIELDSMAP_NAME = "__PropertyContainer__fieldsMap";
    
+   /** The Constant ACTIONSMAP_NAME. */
    private static final String ACTIONSMAP_NAME = "__PropertyContainer__actionsMap";
    
    /** The standard component map. */
@@ -91,6 +97,9 @@ public abstract class PropertyContainer extends ActionManager
       createProperties(this);
    }
    
+   /**
+    * Inits the.
+    */
    protected void init()
    {
       
@@ -168,14 +177,33 @@ public abstract class PropertyContainer extends ActionManager
     */
    public abstract void removePropertyListener(String key, ChangeListener<Object> listener);
    
+   /**
+    * Bind property.
+    *
+    * @param localKey the local key
+    * @param source the source
+    * @param originKey the origin key
+    */
    public abstract void bindProperty(String localKey, PropertyContainer source, String originKey);
    
+   /**
+    * Do association.
+    *
+    * @param key the key
+    * @param element the element
+    */
    public void doAssociation(String key, Object element)
    {
       // nothing
    }
    
 
+   /**
+    * Gets the actions map.
+    *
+    * @param object the object
+    * @return the actions map
+    */
    private static Map<String, List<String>> getActionsMap(Object object)
    {
       if (object instanceof PropertyContainer)
@@ -185,6 +213,12 @@ public abstract class PropertyContainer extends ActionManager
       return getGrownField(object, ACTIONSMAP_NAME);
    }
    
+   /**
+    * Gets the fields map.
+    *
+    * @param object the object
+    * @return the fields map
+    */
    private static Map<String, List<ObjectField>> getFieldsMap(Object object)
    {
       if (object instanceof PropertyContainer)
@@ -197,6 +231,7 @@ public abstract class PropertyContainer extends ActionManager
    /**
     * Adds a property listener message for the given property key.
     *
+    * @param container the container
     * @param key the property key
     * @param message the message key
     */
@@ -217,18 +252,18 @@ public abstract class PropertyContainer extends ActionManager
          }
       }
    }
+   
    /**
     * Associate something with the property container.
     * It should have some annotations.
     * The available annotations are :
     *
-    * @Require(key="key string to define",
+    * @param element the element
+    *  Require(key="key string to define",
     *          type= primitive class or any class type provided it has a constructor without arguments,
     *          action="message identifier")
     * Note : the 'action' parameter is an option. If present, it means that the action will be executed on property change.
     * Entries for required properties will be created in property container at association if needed and initialized to default values.
-    * 
-    * @param element the element
     */
    public final void associate(Object element)
    {
@@ -240,13 +275,13 @@ public abstract class PropertyContainer extends ActionManager
     * It should have some annotations.
     * The available annotations are :
     *
-    * @Require(key="key string to define",
+    * @param keycode the keycode
+    * @param element the element
+    *  Require(key="key string to define",
     *          type= primitive class or any class type provided it has a constructor without arguments,
     *          action="message identifier")
     * Note : the 'action' parameter is an option. If present, it means that the action will be executed on property change.
     * Entries for required properties will be created in property container at association if needed and initialized to default values.
-    * 
-    * @param element the element
     */
    public final void associate(String keycode, Object element)
    {
@@ -254,6 +289,12 @@ public abstract class PropertyContainer extends ActionManager
       doAssociation(keycode, element);
    }
 
+   /**
+    * Associate element.
+    *
+    * @param keycode the keycode
+    * @param element the element
+    */
    private final void associateElement(String keycode, Object element)
    {
       if (element == null)
@@ -273,6 +314,9 @@ public abstract class PropertyContainer extends ActionManager
       execute(this, MESS_ASSOCIATE, this, element);
    }
    
+   /* (non-Javadoc)
+    * @see net.alantea.proper.ActionManager#forget(java.lang.Object)
+    */
    public void forget(Object object)
    {
       if (object != null)
@@ -298,6 +342,7 @@ public abstract class PropertyContainer extends ActionManager
     * The properties found here are those from the Require type.
     *
     * @param element the element
+    * @param keyCode the key code
     */
    private void createRequiredProperties(Object element, String keyCode)
    {
@@ -309,6 +354,8 @@ public abstract class PropertyContainer extends ActionManager
     * The properties found here are those from the Require type.
     *
     * @param element the element
+    * @param cl the cl
+    * @param keyCode the key code
     */
    private void createRequiredProperties(Object element, Class<?> cl, String keyCode)
    {
@@ -375,6 +422,7 @@ public abstract class PropertyContainer extends ActionManager
     * The properties found here are those from the Register type.
     *
     * @param element the element
+    * @param cl the cl
     * @param keyCode the key code
     */
    private void registerItself(Object element, Class<?> cl, String keyCode)
@@ -401,7 +449,6 @@ public abstract class PropertyContainer extends ActionManager
     * Call a method in element to finalize the register process in a container with a key code.
     * The may do anything, but it should call some PropertyContainer methods to ass properties or so...
     *
-    * @param container the container
     * @param element the element
     * @param keyCode the key code
     */
@@ -414,8 +461,8 @@ public abstract class PropertyContainer extends ActionManager
     * Call a method in element to finalize the register process in a container with a key code.
     * The may do anything, but it should call some PropertyContainer methods to ass properties or so...
     *
-    * @param container the container
     * @param element the element
+    * @param cl the cl
     * @param keyCode the key code
     */
    private void manageRegistry(Object element, Class<?> cl, String keyCode)
@@ -461,6 +508,7 @@ public abstract class PropertyContainer extends ActionManager
     *
     * @param element the element
     * @param cl the class
+    * @param keyCode the key code
     */
    protected void associateFields(Object element, Class<?> cl, String keyCode)
    {
@@ -523,6 +571,7 @@ public abstract class PropertyContainer extends ActionManager
     *
     * @param element the element
     * @param cl the class
+    * @param keyCode the key code
     */
    private void initializeFields(Object element, Class<?> cl, String keyCode)
    {
@@ -570,6 +619,8 @@ public abstract class PropertyContainer extends ActionManager
 
    /**
     * Creates the properties.
+    *
+    * @param object the object
     */
    private void createProperties(Object object)
    {
@@ -578,6 +629,9 @@ public abstract class PropertyContainer extends ActionManager
 
    /**
     * Creates the properties.
+    *
+    * @param object the object
+    * @param cl the cl
     */
    private void createProperties(Object object, Class<?> cl)
    {
@@ -621,11 +675,10 @@ public abstract class PropertyContainer extends ActionManager
    /**
     * Creates the property.
     *
-    * @param container the container
     * @param key the key
     * @param type the type
     * @param action the action
-    * @param associate to associate with 
+    * @param associate to associate with
     */
    public void createProperty(String key, Class<?> type, String action, boolean associate)
    {

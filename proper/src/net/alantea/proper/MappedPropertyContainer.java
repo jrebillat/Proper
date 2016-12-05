@@ -12,7 +12,6 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PropertyContainer.
  * A property container instance is the root part of some elements associated with it and working with a common set of properties.
@@ -21,19 +20,19 @@ import javafx.beans.value.ChangeListener;
  * 
  *  Both the property container and the elements must have annotations to ensure a correct association.
  * 
- * The property container or element class should be extended with @Require annotations :
- * @Require(key="key string to define", type= primitive class or any class type provided it has a constructor without arguments,
+ * The property container or element class should be extended with  Require annotations :
+ *  Require(key="key string to define", type= primitive class or any class type provided it has a constructor without arguments,
  * action="action key"). The action parameter is an option.
  * Entries for required properties will be created and added to the container at instance creation and initialized to default values
  *  : 0 value for primitive types, false for booleans, "" for String and null for other object types.
  * 
  * Methods with  zero or one parameter in property container or element class may be extended with one or more @Manage annotations :
- * @Manage("action key string").
- * The action key may correspond to an 'action' parameter value in one or more @Require definition, in the property container,
+ *  Manage("action key string").
+ * The action key may correspond to an 'action' parameter value in one or more  Require definition, in the property container,
  * another associated element or even the same class. Each time the value of the property change, the annotated methods with the
  * action key in any element will be called. If a parameter is needed, the value passed to the method is the new property value.
  * But caution with it : there is no class compatibility verification here.
- * Methods with @Manage annotations in elements may also be called directly using the property container 'execute('action key', value).
+ * Methods with  Manage annotations in elements may also be called directly using the property container 'execute('action key', value).
  * 
  * Fields in elements may also have a single @Associate annotation : @Associate("property key"). If the property already exists in
  * the container, then the value of the field will be set to the field value. If not, then a new property with the field value is 
@@ -74,6 +73,7 @@ public class MappedPropertyContainer extends PropertyContainer
     * Instantiates a new container.
     *
     * @param name the name for container
+    * @param properties the properties
     */
    public MappedPropertyContainer(String name, Map<String, Object> properties)
    {
