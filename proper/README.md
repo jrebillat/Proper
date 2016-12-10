@@ -3,7 +3,7 @@
 ## Concept
 In Java, using reflection and annotations allow to had on-fly actions on the classes and objects from your code. This may be used to analyze code elements and store association between them.
 
-in Proper, we use this concept to connect any object to special objects named *property containers*. This way, we are able to share information and manage actions in a very simple way.
+in Proper, we use this concept to connect any object to special objects named *property containers*. This way, we are able to share information and manage actions in a very simple way, whitout much coding.
 
 ## Property containers
 Basically, a *property container* is just that : an object containing a map of named properties and offering methods to create, get or modify them, that needs to be derived (from base class `PropertyContainer`) to be really useful. But with some special features.
