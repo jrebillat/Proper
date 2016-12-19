@@ -239,6 +239,7 @@ public class MappedPropertyContainer extends PropertyContainer
       }
       else
       {
+         properties.get(key).unbind();
          properties.get(key).set(value);
       }
       ActionManager.execute(this, MESS_SETVALUE, key, value);
