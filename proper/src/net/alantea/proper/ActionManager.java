@@ -317,13 +317,43 @@ public class ActionManager
             try
             {
                Method method = exe.getMethod();
-               if ( parameters.length == method.getParameterCount())
+               if (  method.getParameterCount() == parameters.length)
                {
-//                  System.out.println("execute " + actionKey + " " + method);
-//                  for (Object param : parameters)
-//                  {
-//                     System.out.println("   " + param);
-//                  }
+                  exe.getMethod().invoke(exe.getObject(), parameters);
+               }
+               else if (( method.getParameterCount() == parameters.length + 1)
+                     && (method.getParameterTypes()[0].equals(Object.class)))
+               {
+                  Object[] params = new Object[parameters.length + 1];
+                  params[0] = container;
+                  for (int i = 0; i < parameters.length; i++)
+                  {
+                     params[i+1] = parameters[i];
+                  }
+                  exe.getMethod().invoke(exe.getObject(), params);
+               }
+               else if (( method.getParameterCount() == parameters.length + 1)
+                     && (method.getParameterTypes()[0].equals(String.class)))
+               {
+                  Object[] params = new Object[parameters.length + 1];
+                  params[0] = actionKey;
+                  for (int i = 0; i < parameters.length; i++)
+                  {
+                     params[i+1] = parameters[i];
+                  }
+                  exe.getMethod().invoke(exe.getObject(), params);
+               }
+               else if (( method.getParameterCount() == parameters.length + 2)
+                     && (method.getParameterTypes()[0].equals(Object.class))
+                     && (method.getParameterTypes()[1].equals(String.class)))
+               {
+                  Object[] params = new Object[parameters.length + 2];
+                  params[0] = container;
+                  params[1] = actionKey;
+                  for (int i = 0; i < parameters.length; i++)
+                  {
+                     params[i+2] = parameters[i];
+                  }
                   exe.getMethod().invoke(exe.getObject(), parameters);
                }
                else if (method.getParameterCount() == 0)
