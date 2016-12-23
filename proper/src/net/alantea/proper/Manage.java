@@ -35,5 +35,5 @@ public @interface Manage
     *
     * @return the action key
     */
-   public String code() default ActionManager.ALL_KEYCODES;
+   public String code() default "";
 }

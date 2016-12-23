@@ -332,29 +332,29 @@ public class MappedPropertyContainer extends PropertyContainer
                      e.printStackTrace();
                   }
                }
-            }
-            
-            Property containerProperty = getProperty(associates.value());
-            Property elementProperty = null;
-            try
-            {
-               elementProperty = (Property) field.get(element);
-            }
-            catch (IllegalArgumentException | IllegalAccessException e)
-            {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            }
-            
-            if (elementProperty != null)
-            {
-               if (associates.biDirectional())
+
+               Property containerProperty = getProperty(associates.value());
+               Property elementProperty = null;
+               try
                {
-                  elementProperty.bindBidirectional(containerProperty);
+                  elementProperty = (Property) field.get(element);
                }
-               else
+               catch (IllegalArgumentException | IllegalAccessException e)
                {
-                  elementProperty.bind(containerProperty);
+                  // TODO Auto-generated catch block
+                  e.printStackTrace();
+               }
+
+               if (elementProperty != null)
+               {
+                  if (associates.biDirectional())
+                  {
+                     elementProperty.bindBidirectional(containerProperty);
+                  }
+                  else
+                  {
+                     elementProperty.bind(containerProperty);
+                  }
                }
             }
          }
