@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="Proper" parallel="false">
+  <test name="ActionManagerTest">
+    <classes>
+      <class name="net.alantea.proper.test.ActionManagerTest"/>
+    </classes>
+  </test>
+  <test name="BindTest">
+    <classes>
+      <class name="net.alantea.proper.test.BindTest"/>
+    </classes>
+  </test>
+</suite>

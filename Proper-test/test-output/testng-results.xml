@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="2" passed="2">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="76" started-at="2016-12-23T18:28:18Z" finished-at="2016-12-23T18:28:18Z">
+    <groups>
+    </groups>
+    <test name="Default test" duration-ms="76" started-at="2016-12-23T18:28:18Z" finished-at="2016-12-23T18:28:18Z">
+      <class name="net.alantea.proper.test.AssociateTest">
+        <test-method status="PASS" signature="simpleAsociateTest()[pri:0, instance:net.alantea.proper.test.AssociateTest@3c756e4d]" name="simpleAsociateTest" duration-ms="61" started-at="2016-12-23T19:28:18Z" finished-at="2016-12-23T19:28:18Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- simpleAsociateTest -->
+        <test-method status="PASS" signature="simpleKeycodedBindTest()[pri:0, instance:net.alantea.proper.test.AssociateTest@3c756e4d]" name="simpleKeycodedBindTest" duration-ms="1" started-at="2016-12-23T19:28:18Z" finished-at="2016-12-23T19:28:18Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- simpleKeycodedBindTest -->
+      </class> <!-- net.alantea.proper.test.AssociateTest -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
