@@ -536,7 +536,7 @@ public abstract class PropertyContainer extends ActionManager
                {
                   if (method.getParameterCount() == 2)
                   {
-                     Class<?>[] parmTypes = method.getParameterTypes();
+                    // Class<?>[] parmTypes = method.getParameterTypes();
                     // if (parmTypes[0].isAssignableFrom(PropertyContainer.class))
                      {
                         method.setAccessible(true);

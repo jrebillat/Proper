@@ -1,15 +1,15 @@
-package net.alantea.proper.test.material.associatetest;
+package net.alantea.proper.test.material.initializetest;
 
-import net.alantea.proper.Associate;
+import net.alantea.proper.Initialize;
 import net.alantea.proper.Require;
 
 @Require(key=Names.SIMPLEKEYNAME, type = String.class)
 public class SimpleKeyCodedElement
 {
-   @Associate(value=Names.SIMPLEKEYNAME, code=Names.SIMPLEKEYCODE1)
+   @Initialize(value=Names.SIMPLEKEYNAME, code=Names.SIMPLEKEYCODE1)
    private String keyName1;
 
-   @Associate(value=Names.SIMPLEKEYNAME, code=Names.SIMPLEKEYCODE2)
+   @Initialize(value=Names.SIMPLEKEYNAME, code=Names.SIMPLEKEYCODE2)
    private String keyName2;
 
    public String getSimpleKey1()

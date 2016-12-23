@@ -19,19 +19,16 @@ public class AssociateTest
       container.associate(element);
       
       container.setSimpleKey(Names.SIMPLEASSOCIATETESTVALUE);
-      
       String got = element.getSimpleKey();
       Assert.assertNotNull(got);
       Assert.assertEquals(got, Names.SIMPLEASSOCIATETESTVALUE);
       
       container.setSimpleKey(Names.SIMPLEKEYCODEDASSOCIATETESTVALUE1);
-      
       got = element.getSimpleKey();
       Assert.assertNotNull(got);
       Assert.assertEquals(got, Names.SIMPLEKEYCODEDASSOCIATETESTVALUE1);
       
       container.setSimpleKey(Names.SIMPLEKEYCODEDASSOCIATETESTVALUE2);
-      
       got = element.getSimpleKey();
       Assert.assertNotNull(got);
       Assert.assertEquals(got, Names.SIMPLEKEYCODEDASSOCIATETESTVALUE2);
