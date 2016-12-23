@@ -311,6 +311,7 @@ public abstract class PropertyContainer extends ActionManager
       initializeFields(element, element.getClass(), keycode);
       registerItself(element, keycode);
       manageRegistry(element, keycode);
+      manageListeners(element, keycode);
       execute(this, MESS_ASSOCIATE, this, element);
    }
    
@@ -502,7 +503,66 @@ public abstract class PropertyContainer extends ActionManager
          manageRegistry(element, cl.getSuperclass(), keyCode);
       }
    }
+   
+   /**
+    * Manage listeners.
+    *
+    * @param element the element
+    * @param keyCode the key code
+    */
+   private void manageListeners(Object element, String keyCode)
+   {
+      manageListeners(element, element.getClass(), keyCode);
+   }
 
+   /**
+    * Manage listeners.
+    *
+    * @param element the element
+    * @param cl the cl
+    * @param keyCode the key code
+    */
+   private void manageListeners(Object element, Class<?> cl, String keyCode)
+   {
+      for (Method method : cl.getDeclaredMethods())
+      {
+         if ((method.isAnnotationPresent(Listen.class)) || (method.isAnnotationPresent(Listens.class)))
+         {
+            Listen[] annotations = method.getAnnotationsByType(Listen.class);
+            for (Listen annotation : annotations)
+            {
+               System.out.println("'" + annotation.code() + "' '" + keyCode + "'");
+               if ((annotation.code().equals(keyCode)) || (ALL_KEYCODES.equals(keyCode)))
+               {
+                  if (method.getParameterCount() == 2)
+                  {
+                     Class<?>[] parmTypes = method.getParameterTypes();
+                    // if (parmTypes[0].isAssignableFrom(PropertyContainer.class))
+                     {
+                        method.setAccessible(true);
+                        addPropertyListener(annotation.value(), (v, o, n) -> 
+                        {
+                           try
+                           {
+                              method.invoke(element, this, n);
+                           }
+                           catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+                           {
+                              // TODO Auto-generated catch block
+                              e.printStackTrace();
+                           }
+                        });
+                     }
+                  }
+               }
+            }
+         }
+      }
+      if (!cl.equals(Object.class))
+      {
+         manageRegistry(element, cl.getSuperclass(), keyCode);
+      }
+   }
    /**
     * Associate fields.
     *
@@ -520,7 +580,7 @@ public abstract class PropertyContainer extends ActionManager
             Associate associates = field.getAnnotation(Associate.class);
             if ((associates.code().equals(keyCode)) || (ALL_KEYCODES.equals(keyCode)))
             {
-               if (!hasProperty(associates.value()))
+               if ((!hasProperty(associates.value())) || (getPropertyValue(associates.value()) == null))
                {
                   try
                   {
@@ -699,14 +759,17 @@ public abstract class PropertyContainer extends ActionManager
           {
              for(ObjectField field : propFields)
              {
-                try
+                if (n != null)
                 {
-                   field.getField().set(field.getObject(), n);
-                }
-                catch (IllegalArgumentException | IllegalAccessException e)
-                {
-                   // TODO Auto-generated catch block
-                   e.printStackTrace();
+                   try
+                   {
+                      field.getField().set(field.getObject(), n);
+                   }
+                   catch (IllegalArgumentException | IllegalAccessException e)
+                   {
+                      // TODO Auto-generated catch block
+                      e.printStackTrace();
+                   }
                 }
              }
           }
