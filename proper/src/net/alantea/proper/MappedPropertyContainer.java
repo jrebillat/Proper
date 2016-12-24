@@ -50,6 +50,7 @@ public class MappedPropertyContainer extends PropertyContainer
    
    /** The properties. */
    private Map<String, ObjectProperty<Object>> properties;
+   private Map<String, Class<?>> propertiesClass;
    
    /**
     * Instantiates a new container.
@@ -161,6 +162,10 @@ public class MappedPropertyContainer extends PropertyContainer
       {
          properties = new LinkedHashMap<>();
       }
+      if (propertiesClass == null)
+      {
+         propertiesClass = new LinkedHashMap<>();
+      }
       if ((referenceClass != null) && (key != null))
       {
          if (properties.containsKey(key))
@@ -170,7 +175,9 @@ public class MappedPropertyContainer extends PropertyContainer
             {
                return true;
             }
-            return referenceClass.isAssignableFrom(object.getClass());
+            Class<?> requiredClass = propertiesClass.get(key);
+            return referenceClass.isAssignableFrom(object.getClass())
+                  && ((requiredClass == null) || (requiredClass.isAssignableFrom(referenceClass)));
          }
       }
       return false;
@@ -229,18 +236,37 @@ public class MappedPropertyContainer extends PropertyContainer
       {
          properties = new LinkedHashMap<>();
       }
+      if (propertiesClass == null)
+      {
+         propertiesClass = new LinkedHashMap<>();
+      }
       if (key == null)
       {
          return;
       }
+
+      Class<?> requiredClass = propertiesClass.get(key);
       if (!properties.containsKey(key))
       {
-         properties.put(key, new SimpleObjectProperty<Object>(value));
+         if ((requiredClass == null) && (value != null))
+         {
+            requiredClass = value.getClass();
+            propertiesClass.put(key, requiredClass);
+         }
+         if ((value == null) || ((requiredClass != null) && (requiredClass.isAssignableFrom(value.getClass()))))
+         {
+            properties.put(key, new SimpleObjectProperty<Object>(value));
+         }
       }
       else
       {
-         properties.get(key).unbind();
-         properties.get(key).set(value);
+         Object o = properties.get(key).get();
+         if (((o == null) && requiredClass == null) || (value == null)
+               || ((requiredClass != null) && (requiredClass.isAssignableFrom(value.getClass()))))
+         {
+            properties.get(key).unbind();
+            properties.get(key).set(value);
+         }
       }
       ActionManager.execute(this, MESS_SETVALUE, key, value);
    }
@@ -385,6 +411,7 @@ public class MappedPropertyContainer extends PropertyContainer
     */
    public void setProperty(String key, Object value)
    {
+      // TODO test class
       properties.put(key, new SimpleObjectProperty<Object>(value));
    }
    
@@ -469,5 +496,11 @@ public class MappedPropertyContainer extends PropertyContainer
          }
       }
       return null;
+   }
+
+   @Override
+   public void setPropertyClass(String key, Class<?> value)
+   {
+      propertiesClass.put(key, value);
    }
 }

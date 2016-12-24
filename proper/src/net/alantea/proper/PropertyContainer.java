@@ -14,7 +14,6 @@ import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PropertyContainer.
  * A property container instance is the root part of some elements associated with it and working with a common set of properties.
@@ -160,6 +159,14 @@ public abstract class PropertyContainer extends ActionManager
     * @param value the value
     */
    public abstract void setPropertyValue(String key, Object value);
+
+   /**
+    * Sets the property class.
+    *
+    * @param key the key
+    * @param value the class value
+    */
+   public abstract void setPropertyClass(String key, Class<?> value);
    
    /**
     * Adds a property listener for the given property key.
@@ -382,6 +389,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                }
             }
+            // TODO
             if (annotation.importFrom().equals(keyCode))
             {
                if (reference.get(element) != null)
@@ -393,8 +401,8 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   else
                   {
-                     Object fromValue = refContainer.getPropertyValue(annotation.key());
-                     setPropertyValue(annotation.key(), fromValue);
+                     Object fromValue = getPropertyValue(annotation.key());
+                     refContainer.setPropertyValue(annotation.key(), fromValue);
                   }
                }
             }
@@ -489,7 +497,7 @@ public abstract class PropertyContainer extends ActionManager
                         }
                         catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
                         {
-                           // TODO Auto-generated catch block
+                           // Auto-generated catch block
                            e.printStackTrace();
                         }
                      }
@@ -548,7 +556,7 @@ public abstract class PropertyContainer extends ActionManager
                            }
                            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
                            {
-                              // TODO Auto-generated catch block
+                              // Auto-generated catch block
                               e.printStackTrace();
                            }
                         });
@@ -565,7 +573,7 @@ public abstract class PropertyContainer extends ActionManager
                             }
                             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
                             {
-                               // TODO Auto-generated catch block
+                               // Auto-generated catch block
                                e.printStackTrace();
                             }
                          });
@@ -581,7 +589,7 @@ public abstract class PropertyContainer extends ActionManager
                             }
                             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
                             {
-                               // TODO Auto-generated catch block
+                               // Auto-generated catch block
                                e.printStackTrace();
                             }
                          });
@@ -620,7 +628,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     // TODO Auto-generated catch block
+                     // Auto-generated catch block
                      e.printStackTrace();
                   }
 
@@ -633,7 +641,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     // TODO Auto-generated catch block
+                     // Auto-generated catch block
                      e.printStackTrace();
                   }
                }
@@ -683,7 +691,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     // TODO Auto-generated catch block
+                     // Auto-generated catch block
                      e.printStackTrace();
                   }
 
@@ -696,7 +704,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     // TODO Auto-generated catch block
+                     // Auto-generated catch block
                      e.printStackTrace();
                   }
                }
@@ -731,6 +739,7 @@ public abstract class PropertyContainer extends ActionManager
       for (Require annotation : existing)
       {
          createProperty(annotation);
+         // TODO
          if (annotation.importFrom().equals(annotation.code()))
          {
             if (reference.get(object) != null)
@@ -742,8 +751,8 @@ public abstract class PropertyContainer extends ActionManager
                }
                else
                {
-                  Object fromValue = container.getPropertyValue(annotation.key());
-                  setPropertyValue(annotation.key(), fromValue);
+                  Object fromValue = getPropertyValue(annotation.key());
+                  container.setPropertyValue(annotation.key(), fromValue);
                }
             }
          }
@@ -777,6 +786,7 @@ public abstract class PropertyContainer extends ActionManager
       if (!hasProperty(key, type))
       {
          Object value = getDefaultValueForClass(type);
+         setPropertyClass(key, type);
          setPropertyValue(key, value);
          
          if (associate)
@@ -799,7 +809,7 @@ public abstract class PropertyContainer extends ActionManager
                    }
                    catch (IllegalArgumentException | IllegalAccessException e)
                    {
-                      // TODO Auto-generated catch block
+                      // Auto-generated catch block
                       e.printStackTrace();
                    }
                 }

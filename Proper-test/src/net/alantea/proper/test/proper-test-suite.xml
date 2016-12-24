@@ -35,4 +35,9 @@
       <class name="net.alantea.proper.test.RegisterTest"/>
     </classes>
   </test>
+  <test name="RequireTest">
+    <classes>
+      <class name="net.alantea.proper.test.RequireTest"/>
+    </classes>
+  </test>
 </suite>
