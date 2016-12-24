@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.alantea.proper.EventMessage.Level;
+
 /**
  * The Class ActionManager manages named action by calling methods in associated elements that 
  * manage the named action.
@@ -25,6 +27,9 @@ public class ActionManager
 
    /** The Constant DEFAULT_KEYCODE. Use to specify that this may be applied only to default container. */
    public static final String DEFAULT_KEYCODE = "";
+   
+   /** The Constant DEFAULT_OBJECT_HOOK. */
+   private static final String DEFAULT_OBJECT_HOOK = "__Default_Object_Hook__";
    
    /** The Constant ACTIONMAP_NAME. */
    private static final String ACTIONMAP_NAME = "__ActionManager__actionMap";
@@ -59,6 +64,7 @@ public class ActionManager
          namedManagers.put(name, this);
       }
       actionMap = new LinkedHashMap<>();
+      actionMap.put(DEFAULT_OBJECT_HOOK, new ArrayList<>());
 
       associateActionMethods(this, this, getClass(), "");
    }
@@ -273,6 +279,7 @@ public class ActionManager
                      {
                         actionList = new ArrayList<>();
                         getActionMap(container).put(action, actionList);
+                        getActionMap(DEFAULT_OBJECT_HOOK).put(action, actionList);
                      }
                      method.setAccessible(true);
                      actionList.add(new ObjectMethod(element, method));
@@ -302,12 +309,17 @@ public class ActionManager
    /**
     * Execute.
     *
-    * @param container the container
+    * @param target the target container
     * @param actionKey the action key
     * @param parameters the parameters
     */
-   public static final void execute(Object container, String actionKey, Object... parameters)
+   public static final void execute(Object target, String actionKey, Object... parameters)
    {
+      Object container = target;
+      if (target == null)
+      {
+         container = DEFAULT_OBJECT_HOOK;
+      }
       List<ObjectMethod> actionList = getActionMap(container).get(actionKey);
       if (actionList != null)
       {
@@ -363,8 +375,10 @@ public class ActionManager
             }
             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
             {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
+               if (!EventMessage.EVENTMESSAGEACTION.equals(actionKey))
+               {
+                  EventMessage.sendErrorMessage(target, Level.ERROR, "Error executing " + actionKey);
+               }
             }
          }
       }

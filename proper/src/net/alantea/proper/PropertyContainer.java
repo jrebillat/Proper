@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
+import net.alantea.proper.EventMessage.Level;
 
 /**
  * The Class PropertyContainer.
@@ -441,7 +442,6 @@ public abstract class PropertyContainer extends ActionManager
          Register[] annotations = cl.getAnnotationsByType(Register.class);
          for (Register annotation : annotations)
          {
-            System.out.println(annotation.value() + " '" + annotation.code() + "'" );
             if ((annotation.code().equals(keyCode)) || (ALL_KEYCODES.equals(keyCode)))
             {
                setPropertyValue(annotation.value(), element);
@@ -497,8 +497,7 @@ public abstract class PropertyContainer extends ActionManager
                         }
                         catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
                         {
-                           // Auto-generated catch block
-                           e.printStackTrace();
+                           EventMessage.sendErrorMessage(element, Level.WARNING, "Could not invoke " + annotation.value());
                         }
                      }
                   }
@@ -556,8 +555,7 @@ public abstract class PropertyContainer extends ActionManager
                            }
                            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
                            {
-                              // Auto-generated catch block
-                              e.printStackTrace();
+                              EventMessage.sendErrorMessage(element, Level.WARNING, "Could not listen (2) to " + annotation.value());
                            }
                         });
                      }
@@ -573,8 +571,7 @@ public abstract class PropertyContainer extends ActionManager
                             }
                             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
                             {
-                               // Auto-generated catch block
-                               e.printStackTrace();
+                               EventMessage.sendErrorMessage(element, Level.WARNING, "Could not listen (1) to " + annotation.value());
                             }
                          });
                    }
@@ -589,8 +586,7 @@ public abstract class PropertyContainer extends ActionManager
                             }
                             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
                             {
-                               // Auto-generated catch block
-                               e.printStackTrace();
+                               EventMessage.sendErrorMessage(element, Level.WARNING, "Could not listen (0) to " + annotation.value());
                             }
                          });
                    }
@@ -628,8 +624,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     // Auto-generated catch block
-                     e.printStackTrace();
+                     EventMessage.sendErrorMessage(element, Level.WARNING, "Could not associate field " + associates.value());
                   }
 
                }
@@ -641,8 +636,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     // Auto-generated catch block
-                     e.printStackTrace();
+                     EventMessage.sendErrorMessage(element, Level.WARNING, "Could not get to associate field " + associates.value());
                   }
                }
 
@@ -691,8 +685,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     // Auto-generated catch block
-                     e.printStackTrace();
+                     EventMessage.sendErrorMessage(element, Level.WARNING, "Could not initialize " + initialize.value());
                   }
 
                }
@@ -704,8 +697,7 @@ public abstract class PropertyContainer extends ActionManager
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     // Auto-generated catch block
-                     e.printStackTrace();
+                     EventMessage.sendErrorMessage(element, Level.WARNING, "Could get to initialize " + initialize.value());
                   }
                }
             }
@@ -739,7 +731,6 @@ public abstract class PropertyContainer extends ActionManager
       for (Require annotation : existing)
       {
          createProperty(annotation);
-         // TODO
          if (annotation.importFrom().equals(annotation.code()))
          {
             if (reference.get(object) != null)
@@ -809,8 +800,7 @@ public abstract class PropertyContainer extends ActionManager
                    }
                    catch (IllegalArgumentException | IllegalAccessException e)
                    {
-                      // Auto-generated catch block
-                      e.printStackTrace();
+                      EventMessage.sendErrorMessage(this, Level.WARNING, "Could not send update for property " + key + " to " + action);
                    }
                 }
              }
@@ -904,7 +894,7 @@ public abstract class PropertyContainer extends ActionManager
       }
       catch (InstantiationException | IllegalAccessException e)
       {
-         e.printStackTrace();
+         EventMessage.sendErrorMessage(cl, Level.WARNING, "Could not find default value for " + cl.getName());
       }
       return value;
    }
