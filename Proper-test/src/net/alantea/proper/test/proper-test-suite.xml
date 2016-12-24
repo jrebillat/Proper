@@ -5,9 +5,34 @@
       <class name="net.alantea.proper.test.ActionManagerTest"/>
     </classes>
   </test>
+  <test name="AssociateTest">
+    <classes>
+      <class name="net.alantea.proper.test.AssociateTest"/>
+    </classes>
+  </test>
   <test name="BindTest">
     <classes>
       <class name="net.alantea.proper.test.BindTest"/>
+    </classes>
+  </test>
+  <test name="InitializeTest">
+    <classes>
+      <class name="net.alantea.proper.test.InitializeTest"/>
+    </classes>
+  </test>
+  <test name="ListenTest">
+    <classes>
+      <class name="net.alantea.proper.test.ListenTest"/>
+    </classes>
+  </test>
+  <test name="ManageRegistryTest">
+    <classes>
+      <class name="net.alantea.proper.test.ManageRegistryTest"/>
+    </classes>
+  </test>
+  <test name="RegisterTest">
+    <classes>
+      <class name="net.alantea.proper.test.RegisterTest"/>
     </classes>
   </test>
 </suite>
