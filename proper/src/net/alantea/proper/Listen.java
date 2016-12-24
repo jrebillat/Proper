@@ -9,9 +9,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The annotation Listen, usable only on methods (even private) with zero or one parameter in an element.
- * It is use to add listeners on properties during element association to the annotated method. The method will be called 
- * each time the property is changed.
+ * The annotation Listen, usable only on methods (even private) with zero, one parameter (the value) or two
+ *  (the container and the value) in an element. It is use to add listeners on properties during element 
+ *  association to the annotated method. The method will be called each time the property is changed.
  * It is possible to set multiple @Listen annotations on the same method.
  * This annotation is automatically inherited by derived classes.
  */

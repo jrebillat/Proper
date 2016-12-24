@@ -3,6 +3,7 @@ package net.alantea.proper.test;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import net.alantea.proper.test.material.listentest.MultipleElement;
 import net.alantea.proper.test.material.listentest.Names;
 import net.alantea.proper.test.material.listentest.SimpleContainer;
 import net.alantea.proper.test.material.listentest.SimpleElement;
@@ -73,5 +74,40 @@ public class ListenTest
       Assert.assertNotNull(got);
       Assert.assertEquals(got, Names.SIMPLEKEYCODEDLISTENTESTVALUE2);
       
+   }
+   
+   @Test
+   public void multipleBindTest()
+   {
+      MultipleElement element = new MultipleElement();
+      SimpleContainer container = new SimpleContainer();
+      SimpleContainer container1 = new SimpleContainer();
+      SimpleContainer container2 = new SimpleContainer();
+
+      container.associate(element);
+      container1.associate(Names.SIMPLEKEYCODE1, element);
+      container2.associate(Names.SIMPLEKEYCODE2, element);
+      
+      // Test multiple keycodes on same method
+      container1.setSimpleKey(Names.SIMPLEKEYCODEDLISTENTESTVALUE1);
+      String got = element.getSimpleKey1();
+      Assert.assertNotNull(got);
+      Assert.assertEquals(got, Names.SIMPLEKEYCODEDLISTENTESTVALUE1);
+      
+      container2.setSimpleKey(Names.SIMPLEKEYCODEDLISTENTESTVALUE2);
+      got = element.getSimpleKey1();
+      Assert.assertNotNull(got);
+      Assert.assertEquals(got, Names.SIMPLEKEYCODEDLISTENTESTVALUE2);
+
+      // Test multiple properties on same method
+      container.setSimpleKey(Names.SIMPLEKEYCODEDLISTENTESTVALUE1);
+      got = element.getSimpleKey2();
+      Assert.assertNotNull(got);
+      Assert.assertEquals(got, Names.SIMPLEKEYCODEDLISTENTESTVALUE1);
+
+      container.setSimpleKey1(Names.SIMPLEKEYCODEDLISTENTESTVALUE2);
+      got = element.getSimpleKey2();
+      Assert.assertNotNull(got);
+      Assert.assertEquals(got, Names.SIMPLEKEYCODEDLISTENTESTVALUE2);
    }
 }

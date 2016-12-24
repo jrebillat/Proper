@@ -11,7 +11,7 @@ import net.alantea.proper.test.material.initializetest.SimpleKeyCodedElement;
 public class InitializeTest
 {
    @Test
-   public void simpleAsociateTest()
+   public void simpleInitializeTest()
    {
       SimpleElement element1 = new SimpleElement();
       SimpleContainer container = new SimpleContainer();
@@ -40,7 +40,7 @@ public class InitializeTest
    }
    
    @Test
-   public void simpleKeycodedBindTest()
+   public void simpleKeycodedInitializeTest()
    {
       SimpleKeyCodedElement element = new SimpleKeyCodedElement();
       SimpleContainer container1 = new SimpleContainer();

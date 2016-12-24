@@ -4,6 +4,7 @@ public final class Names
 {
    // Keys
    public static final String SIMPLEKEYNAME = "SimpleKeyName";
+   public static final String SIMPLEKEYNAME1 = "SimpleKeyName1";
    public static final String SIMPLEKEYCODE1 = "SimpleKeyCode1";
    public static final String SIMPLEKEYCODE2 = "SimpleKeyCode2";
    

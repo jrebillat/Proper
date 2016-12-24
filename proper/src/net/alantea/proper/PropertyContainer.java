@@ -470,7 +470,7 @@ public abstract class PropertyContainer extends ActionManager
    {
       for (Method method : cl.getDeclaredMethods())
       {
-         if ((method.isAnnotationPresent(ManageRegistry.class)))
+         if (((method.isAnnotationPresent(ManageRegistry.class))) || ((method.isAnnotationPresent(ManageRegistries.class))))
          {
             ManageRegistry[] annotations = method.getAnnotationsByType(ManageRegistry.class);
             for (ManageRegistry annotation : annotations)
@@ -554,6 +554,38 @@ public abstract class PropertyContainer extends ActionManager
                         });
                      }
                   }
+                  else if (method.getParameterCount() == 1)
+                  {
+                         method.setAccessible(true);
+                         addPropertyListener(annotation.value(), (v, o, n) -> 
+                         {
+                            try
+                            {
+                               method.invoke(element, n);
+                            }
+                            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+                            {
+                               // TODO Auto-generated catch block
+                               e.printStackTrace();
+                            }
+                         });
+                   }
+                  else if (method.getParameterCount() == 0)
+                  {
+                         method.setAccessible(true);
+                         addPropertyListener(annotation.value(), (v, o, n) -> 
+                         {
+                            try
+                            {
+                               method.invoke(element);
+                            }
+                            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+                            {
+                               // TODO Auto-generated catch block
+                               e.printStackTrace();
+                            }
+                         });
+                   }
                }
             }
          }
