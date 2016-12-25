@@ -32,6 +32,9 @@ By default, the key code is the empty String "". Thus if you do not use any key 
 
 It is possible to associate a named container to element with a key code.
 
+## Managing errors
+The package contains a way to manage errors in containers and associated elements. This is the limit : the way to manage errors only work for containers and associated elements. Errors are managed by methods annotated with one or more ManageError annotation. Methods annotated this way will be called each time an error message is sent fot the corresponding level.
+
 ## The annotations
 ### @Require
 The @Require annotation is usable on any class type. It will make sure that a specified property exist in the container, with required type and, optionally, associated action.
@@ -141,6 +144,16 @@ or
 The *property key* value is the key of the corresponding container property, set on at least one @Require somewhere. The container property must have a content value compatible with the field property.
 The *bidirectional* parameter is optional and set to *false* by default. If set to true, the bind is bidirectional. By default or set to false, the bind will be from container property to field property.
 The *code* parameter is optional and, if present, contains the key code this annotation refers to.
+
+### @ManageError
+The @ManageError annotation is usable on any instance method (even on private ones). It only work if the method expect a EventMessage as only parameter. It will just inform the container to execute this method each time the corresponding error is triggered.
+The syntax is :
+```java
+@Manage(Level level)
+```
+
+The *level* value is the level of error managed by the method (INFORMATION, WARNING, ERROR or FATALERROR).
+The method must expect one parameter of type EventMessage. The return type of the method is ignored.
 
 ## Using a PropertyContainer
 The methods to use to initialize, bind or associate elements are located in the PropertyContainer class.

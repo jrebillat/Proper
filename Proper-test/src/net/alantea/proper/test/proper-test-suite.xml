@@ -40,4 +40,9 @@
       <class name="net.alantea.proper.test.RequireTest"/>
     </classes>
   </test>
+  <test name="ManageErrorTest">
+    <classes>
+      <class name="net.alantea.proper.test.ManageErrorTest"/>
+    </classes>
+  </test>
 </suite>

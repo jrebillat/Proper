@@ -11,7 +11,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import net.alantea.proper.EventMessage.Level;
 
 /**
  * The Class PropertyContainer.
@@ -355,7 +354,7 @@ public class MappedPropertyContainer extends PropertyContainer
                   }
                   catch (IllegalArgumentException | IllegalAccessException e)
                   {
-                     EventMessage.sendErrorMessage(element, Level.WARNING, "Could not associate (illegal) " + associates.value());
+                     EventMessage.sendErrorMessage(element, EventMessage.Level.WARNING, "Could not associate (illegal) " + associates.value());
                   }
                }
 
@@ -367,7 +366,7 @@ public class MappedPropertyContainer extends PropertyContainer
                }
                catch (IllegalArgumentException | IllegalAccessException e)
                {
-                  EventMessage.sendErrorMessage(element, Level.WARNING, "Could not get " + associates.value());
+                  EventMessage.sendErrorMessage(element, EventMessage.Level.WARNING, "Could not get " + associates.value());
                }
 
                if (elementProperty != null)

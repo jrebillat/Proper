@@ -10,8 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.alantea.proper.EventMessage.Level;
-
 /**
  * The Class ActionManager manages named action by calling methods in associated elements that 
  * manage the named action.
@@ -27,9 +25,6 @@ public class ActionManager
 
    /** The Constant DEFAULT_KEYCODE. Use to specify that this may be applied only to default container. */
    public static final String DEFAULT_KEYCODE = "";
-   
-   /** The Constant DEFAULT_OBJECT_HOOK. */
-   private static final String DEFAULT_OBJECT_HOOK = "__Default_Object_Hook__";
    
    /** The Constant ACTIONMAP_NAME. */
    private static final String ACTIONMAP_NAME = "__ActionManager__actionMap";
@@ -64,7 +59,6 @@ public class ActionManager
          namedManagers.put(name, this);
       }
       actionMap = new LinkedHashMap<>();
-      actionMap.put(DEFAULT_OBJECT_HOOK, new ArrayList<>());
 
       associateActionMethods(this, this, getClass(), "");
    }
@@ -91,6 +85,11 @@ public class ActionManager
     */
    private static Map<String, List<ObjectMethod>> getActionMap(Object object)
    {
+      if (object == null)
+      {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null parameter for getActionMap()");
+         return new HashMap<>();
+      }
       if (object instanceof PropertyContainer)
       {
          return ((ActionManager)object).actionMap;
@@ -109,6 +108,16 @@ public class ActionManager
    @SuppressWarnings("unchecked")
    protected static <T> Map<String, T> getGrownField(Object object, String name)
    {
+      if (object == null)
+      {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null object for getGrownField()");
+         return new HashMap<>();
+      }
+      if (name == null)
+      {
+         EventMessage.sendErrorMessage(object, EventMessage.Level.WARNING, "Illegal null name for getgrownField()");
+         return new HashMap<>();
+      }
       Map<String, Object> map = grownFields.get(object);
       if (map == null)
       {
@@ -133,6 +142,10 @@ public class ActionManager
     */
    public static ActionManager getManager(String name)
    {
+      if (name == null)
+      {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null name for getManager()");
+      }
       return (name == null) ? null : namedManagers.get(name);
    }
    
@@ -158,12 +171,17 @@ public class ActionManager
    {
       if ((managerName == null) || (element == null))
       {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null parameter for associateNamedManager()");
          return;
       }
       ActionManager manager = namedManagers.get(managerName);
       if (manager != null)
       {
          associateActionMethods(manager, element, element.getClass(), keyCode);
+      }
+      else
+      {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "No manager found in associateNamedManager()");
       }
    }
    
@@ -197,10 +215,22 @@ public class ActionManager
     */
    public static void associateActions(Object container, String keyCode, Object element)
    {
-      if (element != null)
+      if (container == null)
       {
-         associateActionMethods(container, element, element.getClass(), keyCode);
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null container for associateActions()");
+         return;
       }
+      if (keyCode == null)
+      {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null key code for associateActions()");
+         return;
+      }
+      if (element == null)
+      {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null element for associateActions()");
+         return;
+      }
+      associateActionMethods(container, element, element.getClass(), keyCode);
    }
    
    /**
@@ -232,16 +262,23 @@ public class ActionManager
     */
    public static void forget(Object container, Object object)
    {
-      if (object != null)
+      if (container == null)
       {
-         grownFields.remove(object);
-         Collection<String> collection = Collections.unmodifiableCollection(namedManagers.keySet());
-         for (String key : collection)
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null container for forget()");
+         return;
+      }
+      if (object == null)
+      {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null object for forget()");
+         return;
+      }
+      grownFields.remove(object);
+      Collection<String> collection = Collections.unmodifiableCollection(namedManagers.keySet());
+      for (String key : collection)
+      {
+         if (namedManagers.get(key).equals(object))
          {
-            if (namedManagers.get(key).equals(object))
-            {
-               namedManagers.remove(key);
-            }
+            namedManagers.remove(key);
          }
       }
    }
@@ -258,6 +295,7 @@ public class ActionManager
    {
       if ((element == null) || (cl == null) || (!cl.isAssignableFrom(element.getClass())))
       {
+         EventMessage.sendErrorMessage(EventMessage.Level.WARNING, "Illegal null argument for associateActionMethods()");
          return;
       }
       
@@ -279,7 +317,29 @@ public class ActionManager
                      {
                         actionList = new ArrayList<>();
                         getActionMap(container).put(action, actionList);
-                        getActionMap(DEFAULT_OBJECT_HOOK).put(action, actionList);
+                     }
+                     method.setAccessible(true);
+                     actionList.add(new ObjectMethod(element, method));
+                  }
+               }
+            }
+         }
+         if ((ALL_KEYCODES.equals(keyCode)) || ("".equals(keyCode)))
+         {
+            if ((method.isAnnotationPresent(ManageErrors.class)) || (method.isAnnotationPresent(ManageError.class)))
+            {
+               method.setAccessible(true);
+               ManageError[] manageErrors = method.getAnnotationsByType(ManageError.class);
+               for (ManageError manage : manageErrors)
+               {
+                  EventMessage.Level action = manage.value();
+                  if (action != null)
+                  {
+                     List<ObjectMethod> actionList = getActionMap(EventMessage.ERROR_OBJECT).get(action);
+                     if (actionList == null)
+                     {
+                        actionList = new ArrayList<>();
+                        getActionMap(EventMessage.ERROR_OBJECT).put(action.name(), actionList);
                      }
                      method.setAccessible(true);
                      actionList.add(new ObjectMethod(element, method));
@@ -316,9 +376,12 @@ public class ActionManager
    public static final void execute(Object target, String actionKey, Object... parameters)
    {
       Object container = target;
-      if (target == null)
+      if ((target == null) || (actionKey == null))
       {
-         container = DEFAULT_OBJECT_HOOK;
+         if (!EventMessage.Level.FATALERROR.equals(actionKey))
+         {
+            EventMessage.sendErrorMessage(target, EventMessage.Level.WARNING, "Illegal null parameter for execute()");
+         }
       }
       List<ObjectMethod> actionList = getActionMap(container).get(actionKey);
       if (actionList != null)
@@ -375,9 +438,9 @@ public class ActionManager
             }
             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
             {
-               if (!EventMessage.EVENTMESSAGEACTION.equals(actionKey))
+               if (!EventMessage.Level.FATALERROR.equals(actionKey))
                {
-                  EventMessage.sendErrorMessage(target, Level.ERROR, "Error executing " + actionKey);
+                  EventMessage.sendErrorMessage(target, EventMessage.Level.FATALERROR, "Error executing " + actionKey);
                }
             }
          }
