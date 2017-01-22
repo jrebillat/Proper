@@ -412,6 +412,18 @@ public class MappedPropertyContainer extends PropertyContainer
       // TODO test class
       properties.put(key, new SimpleObjectProperty<Object>(value));
    }
+
+   /**
+    * Sets the property.
+    *
+    * @param key the key
+    * @param value the value
+    */
+   public void setProperty(String key, ObjectProperty<Object> value)
+   {
+      // TODO test class
+      properties.put(key, value);
+   }
    
    /**
     * Map properties.

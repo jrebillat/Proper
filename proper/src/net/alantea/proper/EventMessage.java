@@ -97,7 +97,7 @@ public class EventMessage extends Exception
     * Send error message.
     *
     * @param level the level
-    * @param errorMessage the error message
+    * @param message the error message
     */
    public static void sendErrorMessage(Level level, String message)
    {

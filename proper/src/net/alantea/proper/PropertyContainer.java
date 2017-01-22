@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 
 /**
@@ -93,7 +94,15 @@ public abstract class PropertyContainer extends ActionManager
       fieldsMap = new LinkedHashMap<>();
       propertyActionsMap = new LinkedHashMap<>();
 
-      createProperties(this);
+    //  createProperties(this);
+      createRequiredProperties(this, "");
+      associateActionMethods(this, this, this.getClass(), "");
+      associateFields(this, this.getClass(), "");
+      initializeFields(this, this.getClass(), "");
+      registerItself(this, "");
+      manageRegistry(this, "");
+      manageListeners(this, "");
+      execute(this, MESS_ASSOCIATE, this, this);
    }
    
    /**
@@ -159,6 +168,14 @@ public abstract class PropertyContainer extends ActionManager
     * @param value the value
     */
    public abstract void setPropertyValue(String key, Object value);
+
+   /**
+    * Sets the property.
+    *
+    * @param key the key
+    * @param value the value
+    */
+   public abstract void setProperty(String key, ObjectProperty<Object> value);
 
    /**
     * Sets the property class.
@@ -537,7 +554,6 @@ public abstract class PropertyContainer extends ActionManager
             Listen[] annotations = method.getAnnotationsByType(Listen.class);
             for (Listen annotation : annotations)
             {
-               System.out.println("'" + annotation.code() + "' '" + keyCode + "'");
                if ((annotation.code().equals(keyCode)) || (ALL_KEYCODES.equals(keyCode)))
                {
                   if (method.getParameterCount() == 2)
@@ -598,6 +614,7 @@ public abstract class PropertyContainer extends ActionManager
          manageRegistry(element, cl.getSuperclass(), keyCode);
       }
    }
+   
    /**
     * Associate fields.
     *
@@ -709,47 +726,46 @@ public abstract class PropertyContainer extends ActionManager
    }
 
    /**
-    * Creates the properties.
+    * Import property fields.
     *
-    * @param object the object
+    * @param element the element
+    * @param prefix the prefix
     */
-   private void createProperties(Object object)
+   public void importFields(Object element, String prefix)
    {
-      createProperties(object, object.getClass());
+      importFields(element, element.getClass(), prefix);
    }
 
    /**
-    * Creates the properties.
+    * Associate fields.
     *
-    * @param object the object
-    * @param cl the cl
+    * @param element the element
+    * @param cl the class
+    * @param prefix the prefix
     */
-   private void createProperties(Object object, Class<?> cl)
+   @SuppressWarnings("unchecked")
+   protected void importFields(Object element, Class<?> cl, String prefix)
    {
-      Require[] existing = cl.getAnnotationsByType(Require.class);
-      for (Require annotation : existing)
-      {
-         createProperty(annotation);
-         if (annotation.importFrom().equals(annotation.code()))
-         {
-            if (reference.get(object) != null)
-            {
-               PropertyContainer container = reference.get(object);
-               if (annotation.bound())
-               {
-                  bindProperty(annotation.key(), container, annotation.key());
-               }
-               else
-               {
-                  Object fromValue = getPropertyValue(annotation.key());
-                  container.setPropertyValue(annotation.key(), fromValue);
-               }
-            }
-         }
-      }
       if (!Object.class.equals(cl))
       {
-         createProperties(object, cl.getSuperclass());
+         importFields(element, cl.getSuperclass(), prefix);
+      }
+      
+      for (Field field : cl.getDeclaredFields())
+      {
+         if (ObjectProperty.class.isAssignableFrom((Class<?>)field.getType()))
+         {
+            field.setAccessible(true);
+            try
+            {
+               System.out.println("Importing " + ((prefix == null) ? "" : prefix) + field.getName() + "field");
+               setProperty(((prefix == null) ? "" : prefix) + field.getName(), (ObjectProperty<Object>) field.get(element));
+            }
+            catch (IllegalArgumentException | IllegalAccessException e)
+            {
+               EventMessage.sendErrorMessage(element, EventMessage.Level.WARNING, "Could import field " + field.getName());
+            }
+         }
       }
    }
    
