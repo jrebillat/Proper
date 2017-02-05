@@ -907,7 +907,7 @@ public abstract class PropertyContainer extends ActionManager
             }
          }
       }
-      catch (InstantiationException | IllegalAccessException e)
+      catch (Exception e)
       {
          EventMessage.sendErrorMessage(cl, EventMessage.Level.WARNING, "Could not find default value for " + cl.getName());
       }
