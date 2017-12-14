@@ -335,7 +335,7 @@ public class ActionManager
                   EventMessage.Level action = manage.value();
                   if (action != null)
                   {
-                     List<ObjectMethod> actionList = getActionMap(EventMessage.ERROR_OBJECT).get(action);
+                     List<ObjectMethod> actionList = getActionMap(EventMessage.ERROR_OBJECT).get((Object)action);
                      if (actionList == null)
                      {
                         actionList = new ArrayList<>();

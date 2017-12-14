@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 
 /**
@@ -295,6 +296,24 @@ public abstract class PropertyContainer extends ActionManager
    }
    
    /**
+    * Associate something with the property container, inserting it in a property.
+    * It should have some annotations.
+    * The available annotations are :
+    *
+    * @param element the element
+    * @param propertyName the property name
+    *  Require(key="key string to define",
+    *          type= primitive class or any class type provided it has a constructor without arguments,
+    *          action="message identifier")
+    * Note : the 'action' parameter is an option. If present, it means that the action will be executed on property change.
+    * Entries for required properties will be created in property container at association if needed and initialized to default values.
+    */
+   public final void associate(Object element, String propertyName)
+   {
+      associate("", element, propertyName);
+   }
+   
+   /**
     * Associate something with the property container.
     * It should have some annotations.
     * The available annotations are :
@@ -311,6 +330,26 @@ public abstract class PropertyContainer extends ActionManager
    {
       associateElement(keycode, element);
       doAssociation(keycode, element);
+   }
+   
+   /**
+    * Associate something with the property container.
+    * It should have some annotations.
+    * The available annotations are :
+    *
+    * @param keycode the keycode
+    * @param element the element
+    * @param propertyName the property name
+    *  Require(key="key string to define",
+    *          type= primitive class or any class type provided it has a constructor without arguments,
+    *          action="message identifier")
+    * Note : the 'action' parameter is an option. If present, it means that the action will be executed on property change.
+    * Entries for required properties will be created in property container at association if needed and initialized to default values.
+    */
+   public final void associate(String keycode, Object element, String propertyName)
+   {
+      associate(keycode, element);
+      setProperty(propertyName, new SimpleObjectProperty<Object>(element));
    }
 
    /**
