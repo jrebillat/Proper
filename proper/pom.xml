@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.alantea</groupId>
   <artifactId>proper</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <name>Proper</name>
   <packaging>jar</packaging>
   <description>Properties management</description>
