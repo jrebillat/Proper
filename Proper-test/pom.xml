@@ -22,5 +22,10 @@
   		<artifactId>proper</artifactId>
   		<version>0.0.3-SNAPSHOT</version>
   	</dependency>
+  	<dependency>
+    <groupId>org.testng</groupId>
+    <artifactId>testng</artifactId>
+    <version>7.0.0-beta3</version>
+</dependency>
   </dependencies>
 </project>
